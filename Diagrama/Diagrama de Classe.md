@@ -80,17 +80,17 @@ classDiagram
     +gerarPorCliente(clienteId: int) List
   }
 
-  class ReposicaoIA {
-    +analisarHistorico(produtoId: int) void
-    +sugerirReposicao(produto: Produto) boolean
-    +alertarEstoqueBaixo() List
+  class IAService {
++analisarMaisVendidos()
++analisarMenosVendidos()
++identificarProdutosParados()
   }
 
-  Cliente "1" --> "0..*" Venda : realiza
-  Usuario "1" --> "0..*" Venda : registra
-  Venda "1" *-- "1..*" ItemVenda : contem
-  Produto "1" o-- "0..*" ItemVenda : compoe
-  RelatorioVenda "1" --> "0..*" Venda : consolida
-  RelatorioVenda "0..*" --> "0..1" Cliente : filtra por
-  ReposicaoIA ..> Produto : analisa estoque
-  ReposicaoIA ..> Venda : analisa historico
+Cliente "1" --> "0..*" Venda : realiza
+Usuario "1" --> "0..*" Venda : registra
+Venda "1" *-- "1..*" ItemVenda : contem
+Produto "1" o-- "0..*" ItemVenda : compoe
+RelatorioVenda "1" --> "0..*" Venda : consolida
+RelatorioVenda "0..*" --> "0..1" Cliente : filtra por
+IAService ..> Produto : analisa
+IAService ..> Venda : analisa
