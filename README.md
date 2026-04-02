@@ -12,11 +12,14 @@
   <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MYSQL">
 </p>
 
-O **PapelLog** é um **Sistema de Gestão Comercial (SGC)** desenvolvido para atender às necessidades de pequenas papelarias e microempreendedores. O sistema foca na **otimização do controle de estoque** e do **fluxo de vendas**, garantindo a **precisão do inventário** e reduzindo falhas operacionais.
+## 📌 Sobre o Projeto
 
-Como diferencial, utiliza **Inteligência Artificial** para sugerir **reposição de estoque** com base no histórico de vendas, tornando a gestão do pequeno comércio mais estratégica e eficiente.
+Este projeto foi desenvolvido como parte da disciplina de Construção de Software, com foco em arquitetura, modelagem e boas práticas de desenvolvimento.
 
----
+O **PapelLog** é um **Sistema de Gestão Comercial (SGC)** voltado para pequenas papelarias e microempreendedores. A aplicação tem como objetivo otimizar o controle de estoque e o fluxo de vendas, garantindo maior precisão no inventário e redução de falhas operacionais.
+
+Como diferencial, o sistema incorpora **Inteligência Artificial** para analisar o histórico de vendas, identificando produtos mais vendidos, itens com baixa saída e produtos sem movimentação. Com isso, auxilia na tomada de decisões estratégicas, como reposição de estoque e definição de ações comerciais.
+
 
 ## Visuais
 
@@ -42,7 +45,7 @@ O sistema é estruturado em **Arquitetura em Camadas** (Apresentação, Serviço
 import requests
 
 # Exemplo conceitual de consulta à API para verificar alerta de estoque
-response = requests.get("https://api.papellog.com/v1/produtos/alerta-estoque")
+response = requests.get("https://api.papellog.com/v1/relatorios/insights")
 print(response.json())
 ```
 
@@ -59,7 +62,7 @@ Para suporte ou dúvidas sobre a arquitetura do sistema, utilize a aba de **Issu
 - [x] Definição de Requisitos e Arquitetura (Entrega 1 — **2026-04-03**)
 - [ ] Modelagem do Banco de Dados em Nuvem
 - [ ] Desenvolvimento da API REST e Segurança (JWT)
-- [ ] Implementação do Módulo de IA para Inventário
+- [ ] Implementação do Módulo de IA para Análise de Vendas e Insights
 - [ ] Lançamento da Versão Alpha (Entrega Final — **2026-06-26**)
 
 ---
