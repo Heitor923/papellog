@@ -1,10 +1,11 @@
-# Diagrama de Domínio — PapelLog
+# Diagrama de Domínio 
 
 ```mermaid
 classDiagram
   direction TB
 
   class Usuario {
+    username: string
     nome: string
     email: string
     perfil: string
@@ -15,6 +16,8 @@ classDiagram
     nome: string
     cpf: string
     email: string
+    telefone: string
+    endereco: string
   }
 
   class Produto {
@@ -50,11 +53,10 @@ classDiagram
 
   Cliente "1" --> "0..*" Venda : realiza
   Usuario "1" --> "0..*" Venda : registra
-  Venda "1" *-- "1..*" ItemVenda : contém
-  Produto "1" o-- "0..*" ItemVenda : compõe
-  Cliente "1" --> "0..*" RelatorioVenda : origina
-  Venda "1" --> "0..*" RelatorioVenda : inclui
+  Venda "1" *-- "1..*" ItemVenda : contem
+  Produto "1" o-- "0..*" ItemVenda : compoe
+  RelatorioVenda "1" --> "0..*" Venda : consolida
+  RelatorioVenda "0..*" --> "0..1" Cliente : filtra por
   IAReposicao ..> Produto : analisa estoque
-  IAReposicao ..> Venda : analisa histórico
-```
+  IAReposicao ..> Venda : analisa historico
 
