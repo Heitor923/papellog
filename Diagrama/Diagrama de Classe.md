@@ -19,6 +19,7 @@ classDiagram
 
   class Usuario {
     -id: int
+    -username: string
     -nome: string
     -email: string
     -senhaHash: string
@@ -34,7 +35,9 @@ classDiagram
     -cpf: string
     -nome: string
     -email: string
-    +atualizarDados(nome: string, email: string) void
+    -telefone: string
+    -endereco: string
+    +atualizarDados(nome: string, email: string, telefone: string, endereco: string) void
   }
 
   class Produto {
@@ -87,7 +90,7 @@ classDiagram
   Usuario "1" --> "0..*" Venda : registra
   Venda "1" *-- "1..*" ItemVenda : contem
   Produto "1" o-- "0..*" ItemVenda : compoe
-  Cliente "1" --> "0..*" RelatorioVenda : origina
-  Venda "1" --> "0..*" RelatorioVenda : inclui
-  Produto "1" --> "0..*" ServicoReposicaoIA : analisa
-```
+  RelatorioVenda "1" --> "0..*" Venda : consolida
+  RelatorioVenda "0..*" --> "0..1" Cliente : filtra por
+  ReposicaoIA ..> Produto : analisa estoque
+  ReposicaoIA ..> Venda : analisa historico
