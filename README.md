@@ -87,4 +87,4 @@ Este projeto está sob a licença [MIT](https://choosealicense.com/licenses/mit/
 
 ## Status do projeto
 
-🚀 **Em desenvolvimento** — Atualmente focados na documentação técnica e diagramação de processos.
+**Em desenvolvimento** — Atualmente focados na documentação técnica e diagramação de processos.
