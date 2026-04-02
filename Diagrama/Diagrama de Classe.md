@@ -77,7 +77,7 @@ classDiagram
     +gerarPorCliente(clienteId: int) List
   }
 
-  class ServicoReposicaoIA {
+  class ReposicaoIA {
     +analisarHistorico(produtoId: int) void
     +sugerirReposicao(produto: Produto) boolean
     +alertarEstoqueBaixo() List
