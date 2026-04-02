@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue" alt="Licença">
   <img src="https://img.shields.io/badge/python-3670A0?style=flat-square&logo=python&logoColor=ffdd54" alt="Python">
   <img src="https://img.shields.io/badge/django-%23092e20.svg?style=flat-square&logo=django&logoColor=white" alt="Django">
-  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MYSQL">
 </p>
 
 O **PapelLog** é um **Sistema de Gestão Comercial (SGC)** desenvolvido para atender às necessidades de pequenas papelarias e microempreendedores. O sistema foca na **otimização do controle de estoque** e do **fluxo de vendas**, garantindo a **precisão do inventário** e reduzindo falhas operacionais.
