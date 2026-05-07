@@ -1,2 +1,7 @@
-CLAUDE.md
 TASK.md
+CLAUDE.md
+.venv/
+.claude/
+db.sqlite3
+__pycache__/
+*.pycgit init
