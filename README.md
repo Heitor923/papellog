@@ -34,7 +34,7 @@ Como diferencial, o sistema incorpora **Inteligência Artificial** para analisar
 - Interface web com Django MVT
 - Gestão de usuários (ADMIN)
 - Painel administrativo Django (`/admin/`)
-- 19 testes automatizados
+- 14 testes automatizados
 
 ---
 
@@ -118,9 +118,7 @@ GET    /vendas/{id}/
 POST   /vendas/{id}/finalizar/
 GET    /relatorios/periodo/
 GET    /relatorios/cliente/
-GET    /ia/mais-vendidos/
-GET    /ia/menos-vendidos/
-GET    /ia/produtos-parados/
+Análises de IA disponíveis pela interface web em /web/ia/
 ```
 
 ---
