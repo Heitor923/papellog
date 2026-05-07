@@ -83,6 +83,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'EXCEPTION_HANDLER': 'core.exceptions.tratar_excecao',
 }
 
 SIMPLE_JWT = {
