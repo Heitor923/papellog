@@ -25,28 +25,16 @@ class VendaService:
         if not lista_itens:
             raise ValidationError('A venda deve ter pelo menos um item.')
 
-        itens_validados = []
-        for dados_item in lista_itens:
-            quantidade = dados_item['quantidade']
-            if quantidade <= 0:
-                raise ValidationError('A quantidade de cada item deve ser maior que zero.')
-            produto = self.produto_repo.buscar_por_id(dados_item['produto_id'])
-            if produto.estoqueAtual < quantidade:
-                raise ValidationError(
-                    f'Estoque insuficiente para "{produto.nome}". '
-                    f'Disponível: {produto.estoqueAtual}, solicitado: {quantidade}.'
-                )
-            itens_validados.append({'produto': produto, 'quantidade': quantidade})
-
-        venda = self.venda_repo.criar({
+        dados_venda = {
             'cliente_id': dados['cliente_id'],
             'usuario_id': dados['usuario_id'],
-        })
+        }
+        venda = self.venda_repo.criar(dados_venda)
 
         total = Decimal('0')
-        for item in itens_validados:
-            produto = item['produto']
-            quantidade = item['quantidade']
+        for dados_item in lista_itens:
+            produto = self.produto_repo.buscar_por_id(dados_item['produto_id'])
+            quantidade = dados_item['quantidade']
             self.venda_repo.adicionar_item(venda, produto, quantidade, produto.preco)
             total += produto.preco * quantidade
 
@@ -71,3 +59,4 @@ class VendaService:
 
         self.venda_repo.atualizar_status(venda, StatusVenda.FINALIZADA)
         return venda
+

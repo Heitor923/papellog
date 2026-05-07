@@ -8,7 +8,7 @@ classDiagram
     username: string
     nome: string
     email: string
-    perfil: ADMIN | FUNCIONARIO
+    perfil: string
     ativo: boolean
   }
 
@@ -22,7 +22,6 @@ classDiagram
 
   class Produto {
     nome: string
-    descricao: string
     sku: string
     preco: float
     estoqueAtual: int
@@ -33,7 +32,7 @@ classDiagram
   class Venda {
     data: Date
     total: float
-    status: PENDENTE | FINALIZADA | CANCELADA
+    status: string
   }
 
   class ItemVenda {
@@ -42,23 +41,24 @@ classDiagram
     subtotal: float
   }
 
-  class RelatorioService {
-    vendas_por_periodo(inicio, fim)
-    vendas_por_cliente(cliente_id)
+  class RelatorioVenda {
+    dataInicio: Date
+    dataFim: Date
   }
 
-  class IAService {
-    analisar_mais_vendidos()
-    analisar_menos_vendidos()
-    identificar_produtos_parados()
+  class IAAnalise{
+    sugerirReposicao(produto: Produto) boolean
+    alertarEstoqueBaixo() List
   }
+
+
 
   Cliente "1" --> "0..*" Venda : realiza
-  Usuario "1" --> "0..*" Venda : registra
-  Venda "1" *-- "1..*" ItemVenda : contem
-  Produto "1" o-- "0..*" ItemVenda : compoe
-  RelatorioService ..> Venda : consulta
-  RelatorioService ..> Cliente : filtra por
-  IAService ..> Produto : analisa
-  IAService ..> ItemVenda : analisa
-```
+Usuario "1" --> "0..*" Venda : registra
+Venda "1" *-- "1..*" ItemVenda : contem
+Produto "1" o-- "0..*" ItemVenda : compoe
+RelatorioVenda "1" --> "0..*" Venda : consolida
+RelatorioVenda "0..*" --> "0..1" Cliente : filtra por
+IAAnalise ..> Produto : analisa
+IAAnalise ..> Venda : analisa
+

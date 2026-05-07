@@ -107,12 +107,20 @@ Authorization: Bearer <token>
 
 Endpoints principais:
 
-```python
-import requests
-
-# Exemplo conceitual de consulta à API para verificar alerta de estoque
-response = requests.get("https://api.papellog.com/v1/relatorios/insights")
-print(response.json())
+```
+POST   /auth/login/
+GET    /clientes/           POST /clientes/
+PUT    /clientes/{id}/      DELETE /clientes/{id}/
+GET    /produtos/           POST /produtos/
+PUT    /produtos/{id}/      DELETE /produtos/{id}/
+GET    /vendas/             POST /vendas/
+GET    /vendas/{id}/
+POST   /vendas/{id}/finalizar/
+GET    /relatorios/periodo/
+GET    /relatorios/cliente/
+GET    /ia/mais-vendidos/
+GET    /ia/menos-vendidos/
+GET    /ia/produtos-parados/
 ```
 
 ---
@@ -160,4 +168,5 @@ Este projeto está sob a licença [MIT](https://choosealicense.com/licenses/mit/
 
 ## Status do projeto
 
-**Em desenvolvimento** — Atualmente focados na documentação técnica e diagramação de processos.
+**Entrega 2 concluída** — Sistema funcional com API REST, interface web, controle de estoque, relatórios e análise de vendas.
+

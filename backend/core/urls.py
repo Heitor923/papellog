@@ -3,9 +3,6 @@ from django.urls import path
 from core.views import (
     ClienteDetailView,
     ClienteListView,
-    IAMaisVendidosView,
-    IAMenosVendidosView,
-    IAProdutosParadosView,
     ProdutoDetailView,
     ProdutoListView,
     RelatorioVendaClienteView,
@@ -25,7 +22,4 @@ urlpatterns = [
     path('vendas/<int:id>/finalizar', VendaFinalizarView.as_view(), name='venda-finalizar'),
     path('relatorios/vendas/periodo', RelatorioVendaPeriodoView.as_view(), name='relatorio-periodo'),
     path('relatorios/vendas/cliente/<int:cliente_id>', RelatorioVendaClienteView.as_view(), name='relatorio-cliente'),
-    path('ia/mais-vendidos', IAMaisVendidosView.as_view(), name='ia-mais-vendidos'),
-    path('ia/menos-vendidos', IAMenosVendidosView.as_view(), name='ia-menos-vendidos'),
-    path('ia/produtos-parados', IAProdutosParadosView.as_view(), name='ia-produtos-parados'),
 ]

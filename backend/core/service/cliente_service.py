@@ -18,7 +18,7 @@ class ClienteService:
     def criar(self, dados_cliente):
         self._validar_email(dados_cliente.get('email', ''))
         self._validar_cpf_unico(dados_cliente.get('cpf', ''))
-        return self.repo.criar(dados_cliente)
+        return self.repo.salvar(dados_cliente)
 
     def atualizar(self, cliente_id, dados_cliente):
         cliente = self.repo.buscar_por_id(cliente_id)

@@ -4,4 +4,4 @@ CLAUDE.md
 .claude/
 db.sqlite3
 __pycache__/
-*.pyc
+*.pycgit init
