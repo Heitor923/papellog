@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<h3>Clientes</h3>
+
+<h4>Cadastrar Cliente</h4>
+<form method="post">
+    {% csrf_token %}
+    <p><label>Nome: <input type="text" name="nome" required></label></p>
+    <p><label>CPF (apenas números): <input type="text" name="cpf" maxlength="11" required></label></p>
+    <p><label>Email: <input type="email" name="email" required></label></p>
+    <p><label>Telefone: <input type="text" name="telefone"></label></p>
+    <p><label>Endereço: <input type="text" name="endereco"></label></p>
+    <button type="submit">Cadastrar</button>
+</form>
+
+<hr>
+
+<h4>Clientes Cadastrados</h4>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>CPF</th>
+        <th>Email</th>
+        <th>Telefone</th>
+        <th>Endereço</th>
+        <th>Ações</th>
+    </tr>
+    {% for cliente in clientes %}
+    <tr>
+        <td>{{ cliente.id }}</td>
+        <td>{{ cliente.nome }}</td>
+        <td>{{ cliente.cpf }}</td>
+        <td>{{ cliente.email }}</td>
+        <td>{{ cliente.telefone }}</td>
+        <td>{{ cliente.endereco }}</td>
+        <td>
+            <a href="/web/clientes/{{ cliente.id }}/editar/">Editar</a>
+            {% if user.perfil == 'ADMIN' %}
+            |
+            <form method="post" action="/web/clientes/{{ cliente.id }}/excluir/" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Excluir {{ cliente.nome }}?')">Excluir</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7">Nenhum cliente cadastrado.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

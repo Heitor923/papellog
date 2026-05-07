@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<h3>Análise de Vendas</h3>
+
+<h4>Produtos mais vendidos</h4>
+<table>
+    <tr>
+        <th>Produto</th>
+        <th>Quantidade total vendida</th>
+    </tr>
+    {% for item in mais_vendidos %}
+    <tr>
+        <td>{{ item.produto_nome }}</td>
+        <td>{{ item.total_vendido }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="2">Nenhuma venda registrada ainda.</td></tr>
+    {% endfor %}
+</table>
+
+<br>
+
+<h4>Produtos menos vendidos</h4>
+<table>
+    <tr>
+        <th>Produto</th>
+        <th>Quantidade total vendida</th>
+    </tr>
+    {% for item in menos_vendidos %}
+    <tr>
+        <td>{{ item.produto_nome }}</td>
+        <td>{{ item.total_vendido }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="2">Nenhuma venda registrada ainda.</td></tr>
+    {% endfor %}
+</table>
+
+<br>
+
+<h4>Produtos parados <small style="font-weight:normal; color:#888;">(sem nenhuma venda registrada)</small></h4>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>SKU</th>
+        <th>Estoque atual</th>
+    </tr>
+    {% for produto in parados %}
+    <tr>
+        <td>{{ produto.id }}</td>
+        <td>{{ produto.nome }}</td>
+        <td>{{ produto.sku }}</td>
+        <td>{{ produto.estoqueAtual }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Todos os produtos têm pelo menos uma venda registrada.</td></tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
