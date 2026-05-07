@@ -1,0 +1,43 @@
+from django.urls import path
+
+from core.views.web_view import (
+    editar_cliente,
+    editar_produto,
+    editar_usuario,
+    excluir_cliente,
+    excluir_produto,
+    finalizar_venda,
+    redefinir_senha,
+    tela_clientes,
+    tela_ia,
+    tela_login,
+    tela_logout,
+    tela_menu,
+    tela_menu_admin,
+    tela_menu_funcionario,
+    tela_produtos,
+    tela_relatorios,
+    tela_usuarios,
+    tela_vendas,
+)
+
+urlpatterns = [
+    path('login/', tela_login, name='web-login'),
+    path('logout/', tela_logout, name='web-logout'),
+    path('menu/', tela_menu, name='web-menu'),
+    path('menu/admin/', tela_menu_admin, name='web-menu-admin'),
+    path('menu/funcionario/', tela_menu_funcionario, name='web-menu-funcionario'),
+    path('clientes/', tela_clientes, name='web-clientes'),
+    path('clientes/<int:cliente_id>/editar/', editar_cliente, name='web-editar-cliente'),
+    path('clientes/<int:cliente_id>/excluir/', excluir_cliente, name='web-excluir-cliente'),
+    path('produtos/', tela_produtos, name='web-produtos'),
+    path('produtos/<int:produto_id>/editar/', editar_produto, name='web-editar-produto'),
+    path('produtos/<int:produto_id>/excluir/', excluir_produto, name='web-excluir-produto'),
+    path('vendas/', tela_vendas, name='web-vendas'),
+    path('vendas/<int:venda_id>/finalizar/', finalizar_venda, name='web-finalizar-venda'),
+    path('relatorios/', tela_relatorios, name='web-relatorios'),
+    path('ia/', tela_ia, name='web-ia'),
+    path('usuarios/', tela_usuarios, name='web-usuarios'),
+    path('usuarios/<int:usuario_id>/editar/', editar_usuario, name='web-editar-usuario'),
+    path('usuarios/<int:usuario_id>/senha/', redefinir_senha, name='web-redefinir-senha'),
+]

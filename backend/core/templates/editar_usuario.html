@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<h3>Editar Usuário — {{ usuario.username }}</h3>
+
+<form method="post">
+    {% csrf_token %}
+    <p><label>Nome: <input type="text" name="nome" value="{{ usuario.nome }}"></label></p>
+    <p><label>Email: <input type="email" name="email" value="{{ usuario.email }}"></label></p>
+    <p>
+        <label>Perfil:
+            <select name="perfil">
+                {% for valor, label in perfis %}
+                <option value="{{ valor }}" {% if usuario.perfil == valor %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    </p>
+    <p><label><input type="checkbox" name="ativo" {% if usuario.ativo %}checked{% endif %}> Ativo</label></p>
+    <button type="submit">Salvar</button>
+    <a href="/web/usuarios/">Cancelar</a>
+</form>
+
+{% endblock %}

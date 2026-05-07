@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<h3>Editar Produto</h3>
+
+<form method="post">
+    {% csrf_token %}
+    <p><label>Nome: <input type="text" name="nome" value="{{ produto.nome }}" required></label></p>
+    <p><label>Descrição: <textarea name="descricao">{{ produto.descricao }}</textarea></label></p>
+    <p><label>SKU: <input type="text" name="sku" value="{{ produto.sku }}" required></label></p>
+    <p><label>Preço: <input type="number" name="preco" step="0.01" min="0" value="{{ produto.preco }}" required></label></p>
+    <p><label>Estoque Atual: <input type="number" name="estoqueAtual" min="0" value="{{ produto.estoqueAtual }}" required></label></p>
+    <p><label>Estoque Mínimo: <input type="number" name="estoqueMinimo" min="0" value="{{ produto.estoqueMinimo }}" required></label></p>
+    <p><label><input type="checkbox" name="ativo" {% if produto.ativo %}checked{% endif %}> Ativo</label></p>
+    <button type="submit">Salvar</button>
+    <a href="/web/produtos/">Cancelar</a>
+</form>
+
+{% endblock %}

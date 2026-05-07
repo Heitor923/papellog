@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>PapelLog</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #333;
+        }
+
+        /* Cabeçalho */
+        header {
+            background-color: #e07820;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        header img { height: 48px; }
+        header span { font-size: 1.4rem; font-weight: bold; letter-spacing: 1px; }
+
+        /* Navegação */
+        nav {
+            background-color: #f5f5f5;
+            border-bottom: 3px solid #e07820;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        nav a {
+            color: #e07820;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 3px;
+        }
+        nav a:hover { background-color: #e07820; color: #fff; }
+        nav .usuario {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Conteúdo principal */
+        .conteudo { padding: 24px 28px; }
+
+        /* Títulos */
+        h2, h3 { color: #e07820; margin-bottom: 12px; }
+        h4 { color: #555; margin: 16px 0 8px; }
+
+        /* Mensagens */
+        .msg-sucesso {
+            background-color: #efffef;
+            border-left: 4px solid #2d9e2d;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            color: #1a6e1a;
+        }
+        .msg-erro {
+            background-color: #fff0f0;
+            border-left: 4px solid #cc2222;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            color: #992222;
+        }
+
+        /* Tabelas */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 8px;
+        }
+        table th {
+            background-color: #e07820;
+            color: #fff;
+            padding: 9px 12px;
+            text-align: left;
+        }
+        table td { padding: 8px 12px; border-bottom: 1px solid #e8e8e8; }
+        table tr:nth-child(even) { background-color: #fafafa; }
+        table tr:hover { background-color: #fff4eb; }
+
+        /* Botões */
+        button, .btn {
+            background-color: #e07820;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        button:hover, .btn:hover { background-color: #b85f10; }
+        button.danger { background-color: #cc2222; }
+        button.danger:hover { background-color: #991a1a; }
+
+        /* Formulários */
+        input[type="text"], input[type="email"], input[type="number"],
+        input[type="password"], input[type="date"], select, textarea {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+        label { display: block; margin-bottom: 10px; font-size: 0.95rem; }
+        form p { margin-bottom: 10px; }
+
+        /* Caixa de resumo */
+        .resumo {
+            background-color: #fff8f2;
+            border-left: 4px solid #e07820;
+            padding: 12px 18px;
+            margin: 16px 0;
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .resumo strong { display: block; font-size: 0.8rem; color: #888; }
+        .resumo span { font-size: 1.2rem; font-weight: bold; color: #e07820; }
+
+        /* Situação de estoque */
+        .estoque-baixo { color: #cc2222; font-weight: bold; }
+
+        hr { border: none; border-top: 1px solid #e8e8e8; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="{% static 'PapelLog.png' %}" alt="PapelLog">
+    <span>PapelLog</span>
+</header>
+
+<nav>
+    <a href="/web/menu/">Menu</a>
+    <a href="/web/clientes/">Clientes</a>
+    <a href="/web/produtos/">Produtos</a>
+    <a href="/web/vendas/">Vendas</a>
+    <a href="/web/relatorios/">Relatórios</a>
+    <a href="/web/ia/">Análise</a>
+    {% if user.perfil == 'ADMIN' %}
+    <a href="/web/usuarios/">Usuários</a>
+    {% endif %}
+    <span class="usuario">{{ user.username }} ({{ user.perfil }}) &nbsp;|&nbsp; <a href="/web/logout/">Sair</a></span>
+</nav>
+
+<div class="conteudo">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}msg-erro{% else %}msg-sucesso{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block conteudo %}{% endblock %}
+
+</div>
+</body>
+</html>

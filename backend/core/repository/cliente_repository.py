@@ -15,7 +15,7 @@ class ClienteRepository:
     def tem_vendas(self, cliente_id):
         return Venda.objects.filter(cliente_id=cliente_id).exists()
 
-    def salvar(self, dados_cliente):
+    def criar(self, dados_cliente):
         return Cliente.objects.create(**dados_cliente)
 
     def atualizar(self, cliente, dados_cliente):

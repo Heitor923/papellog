@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<h3>Redefinir Senha — {{ usuario.username }}</h3>
+
+<form method="post">
+    {% csrf_token %}
+    <p><label>Nova senha: <input type="password" name="nova_senha" required></label></p>
+    <button type="submit">Salvar</button>
+    <a href="/web/usuarios/">Cancelar</a>
+</form>
+
+{% endblock %}

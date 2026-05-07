@@ -39,3 +39,22 @@ class ProdutoServiceTest(TestCase):
         produto = self.service.criar(self.dados_base.copy())
         with self.assertRaises(ValidationError):
             self.service.atualizar(produto.id, {'preco': '-1.00'})
+
+    def test_estoque_atual_negativo_levanta_erro(self):
+        dados = self.dados_base.copy()
+        dados['estoqueAtual'] = -1
+        with self.assertRaises(ValidationError):
+            self.service.criar(dados)
+
+    def test_estoque_minimo_negativo_levanta_erro(self):
+        dados = self.dados_base.copy()
+        dados['estoqueMinimo'] = -1
+        with self.assertRaises(ValidationError):
+            self.service.criar(dados)
+
+    def test_produto_com_estoque_baixo(self):
+        dados = self.dados_base.copy()
+        dados['estoqueAtual'] = 3
+        dados['estoqueMinimo'] = 5
+        produto = self.service.criar(dados)
+        self.assertTrue(produto.estoqueAtual <= produto.estoqueMinimo)

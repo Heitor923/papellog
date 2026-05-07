@@ -13,7 +13,7 @@ class ProdutoRepository:
         produto.estoqueAtual -= quantidade
         produto.save()
 
-    def salvar(self, dados_produto):
+    def criar(self, dados_produto):
         return Produto.objects.create(**dados_produto)
 
     def atualizar(self, produto, dados_produto):

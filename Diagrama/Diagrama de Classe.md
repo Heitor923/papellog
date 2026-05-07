@@ -25,9 +25,6 @@ classDiagram
     -senhaHash: string
     -perfil: PerfilUsuario
     -ativo: boolean
-    +autenticar(senha: string) boolean
-    +ativar() void
-    +desativar() void
   }
 
   class Cliente {
@@ -37,20 +34,17 @@ classDiagram
     -email: string
     -telefone: string
     -endereco: string
-    +atualizarDados(nome: string, email: string, telefone: string, endereco: string) void
   }
 
   class Produto {
     -id: int
     -nome: string
+    -descricao: string
     -sku: string
     -preco: float
     -estoqueAtual: int
     -estoqueMinimo: int
     -ativo: boolean
-    +baixarEstoque(qtd: int) void
-    +reporEstoque(qtd: int) void
-    +estaDisponivel(qtd: int) boolean
   }
 
   class Venda {
@@ -58,11 +52,6 @@ classDiagram
     -data: Date
     -total: float
     -status: StatusVenda
-    +adicionarItem(produto: Produto, qtd: int) void
-    +removerItem(item: ItemVenda) void
-    +calcularTotal() float
-    +finalizar() void
-    +cancelar() void
   }
 
   class ItemVenda {
@@ -70,27 +59,57 @@ classDiagram
     -quantidade: int
     -precoUnitario: float
     -subtotal: float
-    +calcularSubtotal() float
   }
 
-  class RelatorioVenda {
-    -dataInicio: Date
-    -dataFim: Date
-    +gerarPorPeriodo(inicio: Date, fim: Date) List
-    +gerarPorCliente(clienteId: int) List
+  class VendaService {
+    <<service>>
+    +criar(dados_venda) Venda
+    +finalizar(venda_id) Venda
+    +listar() List
+    +buscar(venda_id) Venda
+  }
+
+  class ClienteService {
+    <<service>>
+    +criar(dados_cliente) Cliente
+    +atualizar(cliente_id, dados_cliente) Cliente
+    +excluir(cliente_id) void
+    +listar() List
+    +buscar(cliente_id) Cliente
+  }
+
+  class ProdutoService {
+    <<service>>
+    +criar(dados_produto) Produto
+    +atualizar(produto_id, dados_produto) Produto
+    +excluir(produto_id) void
+    +listar() List
+    +buscar(produto_id) Produto
+  }
+
+  class RelatorioService {
+    <<service>>
+    +vendas_por_periodo(inicio, fim) List
+    +vendas_por_cliente(cliente_id) List
   }
 
   class IAService {
-+analisarMaisVendidos()
-+analisarMenosVendidos()
-+identificarProdutosParados()
+    <<service>>
+    +analisar_mais_vendidos() List
+    +analisar_menos_vendidos() List
+    +identificar_produtos_parados() List
   }
 
 Cliente "1" --> "0..*" Venda : realiza
 Usuario "1" --> "0..*" Venda : registra
 Venda "1" *-- "1..*" ItemVenda : contem
 Produto "1" o-- "0..*" ItemVenda : compoe
-RelatorioVenda "1" --> "0..*" Venda : consolida
-RelatorioVenda "0..*" --> "0..1" Cliente : filtra por
+VendaService ..> Venda : gerencia
+VendaService ..> Produto : verifica estoque
+ClienteService ..> Cliente : gerencia
+ProdutoService ..> Produto : gerencia
+RelatorioService ..> Venda : consulta
+RelatorioService ..> Cliente : filtra por
 IAService ..> Produto : analisa
-IAService ..> Venda : analisa
+IAService ..> ItemVenda : analisa
+```
