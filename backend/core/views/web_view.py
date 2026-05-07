@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -72,7 +73,11 @@ def tela_clientes(request):
 
 @login_required(login_url='/web/login/')
 def editar_cliente(request, cliente_id):
-    cliente = ClienteService().buscar(cliente_id)
+    try:
+        cliente = ClienteService().buscar(cliente_id)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Cliente não encontrado.')
+        return redirect('/web/clientes/')
     if request.method == 'POST':
         dados = {
             'nome': request.POST.get('nome'),
@@ -111,18 +116,20 @@ def tela_produtos(request):
         if request.user.perfil != PerfilUsuario.ADMIN:
             messages.error(request, 'Apenas administradores podem cadastrar produtos.')
             return redirect('/web/produtos/')
-        dados = {
-            'nome': request.POST.get('nome'),
-            'descricao': request.POST.get('descricao', ''),
-            'sku': request.POST.get('sku'),
-            'preco': request.POST.get('preco'),
-            'estoqueAtual': int(request.POST.get('estoqueAtual', 0)),
-            'estoqueMinimo': int(request.POST.get('estoqueMinimo', 0)),
-            'ativo': 'ativo' in request.POST,
-        }
         try:
+            dados = {
+                'nome': request.POST.get('nome'),
+                'descricao': request.POST.get('descricao', ''),
+                'sku': request.POST.get('sku'),
+                'preco': request.POST.get('preco'),
+                'estoqueAtual': int(request.POST.get('estoqueAtual', 0)),
+                'estoqueMinimo': int(request.POST.get('estoqueMinimo', 0)),
+                'ativo': 'ativo' in request.POST,
+            }
             ProdutoService().criar(dados)
             messages.success(request, 'Produto cadastrado com sucesso.')
+        except (ValueError, TypeError):
+            messages.error(request, 'Valores de estoque inválidos.')
         except Exception as e:
             messages.error(request, str(e))
         return redirect('/web/produtos/')
@@ -136,21 +143,27 @@ def editar_produto(request, produto_id):
     if request.user.perfil != PerfilUsuario.ADMIN:
         messages.error(request, 'Apenas administradores podem editar produtos.')
         return redirect('/web/produtos/')
-    produto = ProdutoService().buscar(produto_id)
+    try:
+        produto = ProdutoService().buscar(produto_id)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Produto não encontrado.')
+        return redirect('/web/produtos/')
     if request.method == 'POST':
-        dados = {
-            'nome': request.POST.get('nome'),
-            'descricao': request.POST.get('descricao', ''),
-            'sku': request.POST.get('sku'),
-            'preco': request.POST.get('preco'),
-            'estoqueAtual': int(request.POST.get('estoqueAtual', 0)),
-            'estoqueMinimo': int(request.POST.get('estoqueMinimo', 0)),
-            'ativo': 'ativo' in request.POST,
-        }
         try:
+            dados = {
+                'nome': request.POST.get('nome'),
+                'descricao': request.POST.get('descricao', ''),
+                'sku': request.POST.get('sku'),
+                'preco': request.POST.get('preco'),
+                'estoqueAtual': int(request.POST.get('estoqueAtual', 0)),
+                'estoqueMinimo': int(request.POST.get('estoqueMinimo', 0)),
+                'ativo': 'ativo' in request.POST,
+            }
             ProdutoService().atualizar(produto_id, dados)
             messages.success(request, 'Produto atualizado com sucesso.')
             return redirect('/web/produtos/')
+        except (ValueError, TypeError):
+            messages.error(request, 'Valores de estoque inválidos.')
         except Exception as e:
             messages.error(request, str(e))
     return render(request, 'editar_produto.html', {'produto': produto})
@@ -174,14 +187,14 @@ def excluir_produto(request, produto_id):
 @login_required(login_url='/web/login/')
 def tela_vendas(request):
     if request.method == 'POST':
-        produto_ids = request.POST.getlist('produto_ids')
-        quantidades = request.POST.getlist('quantidades')
-        itens = [
-            {'produto_id': int(pid), 'quantidade': int(qtd)}
-            for pid, qtd in zip(produto_ids, quantidades)
-            if pid and qtd
-        ]
         try:
+            produto_ids = request.POST.getlist('produto_ids')
+            quantidades = request.POST.getlist('quantidades')
+            itens = [
+                {'produto_id': int(pid), 'quantidade': int(qtd)}
+                for pid, qtd in zip(produto_ids, quantidades)
+                if pid and qtd
+            ]
             dados = {
                 'cliente_id': int(request.POST.get('cliente_id')),
                 'usuario_id': request.user.id,
@@ -189,6 +202,8 @@ def tela_vendas(request):
             }
             VendaService().criar(dados)
             messages.success(request, 'Venda registrada com sucesso.')
+        except (ValueError, TypeError):
+            messages.error(request, 'Dados de venda inválidos.')
         except Exception as e:
             messages.error(request, str(e))
         return redirect('/web/vendas/')
@@ -262,7 +277,11 @@ def editar_usuario(request, usuario_id):
         messages.error(request, 'Acesso restrito a administradores.')
         return redirect('/web/menu/')
 
-    usuario = UsuarioService().buscar(usuario_id)
+    try:
+        usuario = UsuarioService().buscar(usuario_id)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Usuário não encontrado.')
+        return redirect('/web/usuarios/')
     if request.method == 'POST':
         dados = {
             'nome': request.POST.get('nome', ''),
@@ -288,7 +307,11 @@ def redefinir_senha(request, usuario_id):
         messages.error(request, 'Acesso restrito a administradores.')
         return redirect('/web/menu/')
 
-    usuario = UsuarioService().buscar(usuario_id)
+    try:
+        usuario = UsuarioService().buscar(usuario_id)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Usuário não encontrado.')
+        return redirect('/web/usuarios/')
     if request.method == 'POST':
         nova_senha = request.POST.get('nova_senha', '')
         try:

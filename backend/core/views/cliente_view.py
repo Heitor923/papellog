@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models import ProtectedError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -62,5 +63,7 @@ class ClienteDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ObjectDoesNotExist:
             return Response({'erro': 'Cliente não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        except ProtectedError:
+            return Response({'erro': 'Não é possível excluir porque existem registros vinculados.'}, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as e:
             return Response({'erro': e.messages}, status=status.HTTP_400_BAD_REQUEST)

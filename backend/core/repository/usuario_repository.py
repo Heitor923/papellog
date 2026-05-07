@@ -10,7 +10,7 @@ class UsuarioRepository:
         return Usuario.objects.get(id=usuario_id)
 
     def criar(self, dados_usuario):
-        senha = dados_usuario.pop('senha')
+        senha = dados_usuario.pop('senha', None)
         dados_usuario['is_active'] = dados_usuario.get('ativo', True)
         usuario = Usuario(**dados_usuario)
         usuario.set_password(senha)
