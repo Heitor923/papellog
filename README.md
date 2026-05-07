@@ -82,7 +82,7 @@ cd backend
 python manage.py test core
 ```
 
-19 testes cobrindo ClienteService, ProdutoService e VendaService.
+14 testes cobrindo ClienteService, ProdutoService e VendaService.
 
 ---
 
