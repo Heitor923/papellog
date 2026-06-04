@@ -1,6 +1,7 @@
 from django.urls import path
 
 from core.views.web_view import (
+    cancelar_venda,
     editar_cliente,
     editar_produto,
     editar_usuario,
@@ -35,6 +36,7 @@ urlpatterns = [
     path('produtos/<int:produto_id>/excluir/', excluir_produto, name='web-excluir-produto'),
     path('vendas/', tela_vendas, name='web-vendas'),
     path('vendas/<int:venda_id>/finalizar/', finalizar_venda, name='web-finalizar-venda'),
+    path('vendas/<int:venda_id>/cancelar/', cancelar_venda, name='web-cancelar-venda'),
     path('relatorios/', tela_relatorios, name='web-relatorios'),
     path('ia/', tela_ia, name='web-ia'),
     path('usuarios/', tela_usuarios, name='web-usuarios'),

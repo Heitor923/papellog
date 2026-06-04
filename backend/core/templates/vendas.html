@@ -116,6 +116,19 @@ function removerItem(id) {
 }
 </script>
 
+<script>
+function confirmarCancelamento(form) {
+    var motivo = prompt('Informe o motivo do cancelamento:');
+    if (motivo === null) return false;
+    if (motivo.trim() === '') {
+        alert('O motivo não pode ser vazio.');
+        return false;
+    }
+    form.querySelector('.motivo-input').value = motivo;
+    return true;
+}
+</script>
+
 <hr>
 
 <h4>Vendas Registradas</h4>
@@ -137,12 +150,26 @@ function removerItem(id) {
         <td>{{ venda.status }}</td>
         <td>
             {% if venda.status == 'PENDENTE' %}
-            <form method="post" action="/web/vendas/{{ venda.id }}/finalizar/">
+            <form method="post" action="/web/vendas/{{ venda.id }}/finalizar/" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit">Finalizar</button>
             </form>
+            {% endif %}
+            {% if venda.status != 'CANCELADA' %}
+            <form method="post" action="/web/vendas/{{ venda.id }}/cancelar/" style="display:inline;"
+                  onsubmit="return confirmarCancelamento(this);">
+                {% csrf_token %}
+                <input type="hidden" name="motivo" class="motivo-input">
+                <button type="submit">Cancelar</button>
+            </form>
             {% else %}
-            —
+            <em>Cancelada</em>
+            {% if venda.motivo_cancelamento %}
+            <br><small>Motivo: {{ venda.motivo_cancelamento }}</small>
+            {% endif %}
+            {% if venda.data_cancelamento %}
+            <br><small>Em: {{ venda.data_cancelamento|date:"d/m/Y H:i" }}</small>
+            {% endif %}
             {% endif %}
         </td>
     </tr>

@@ -7,6 +7,7 @@ from core.views import (
     ProdutoListView,
     RelatorioVendaClienteView,
     RelatorioVendaPeriodoView,
+    VendaCancelarView,
     VendaDetailView,
     VendaFinalizarView,
     VendaListView,
@@ -20,6 +21,7 @@ urlpatterns = [
     path('vendas', VendaListView.as_view(), name='venda-list'),
     path('vendas/<int:id>', VendaDetailView.as_view(), name='venda-detail'),
     path('vendas/<int:id>/finalizar', VendaFinalizarView.as_view(), name='venda-finalizar'),
+    path('vendas/<int:id>/cancelar', VendaCancelarView.as_view(), name='venda-cancelar'),
     path('relatorios/vendas/periodo', RelatorioVendaPeriodoView.as_view(), name='relatorio-periodo'),
     path('relatorios/vendas/cliente/<int:cliente_id>', RelatorioVendaClienteView.as_view(), name='relatorio-cliente'),
 ]

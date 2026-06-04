@@ -228,6 +228,18 @@ def finalizar_venda(request, venda_id):
     return redirect('/web/vendas/')
 
 
+@login_required(login_url='/web/login/')
+def cancelar_venda(request, venda_id):
+    if request.method == 'POST':
+        motivo = request.POST.get('motivo', '')
+        try:
+            VendaService().cancelar(venda_id, motivo, request.user)
+            messages.success(request, 'Venda cancelada com sucesso.')
+        except Exception as e:
+            messages.error(request, str(e))
+    return redirect('/web/vendas/')
+
+
 # --- Análise IA ---
 
 @login_required(login_url='/web/login/')

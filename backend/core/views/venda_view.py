@@ -56,3 +56,20 @@ class VendaFinalizarView(APIView):
             return Response({'erro': 'Venda não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             return Response({'erro': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VendaCancelarView(APIView):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = VendaService()
+
+    def post(self, request, id):
+        motivo = request.data.get('motivo', '')
+        try:
+            venda = self.service.cancelar(id, motivo, request.user)
+            return Response(VendaSerializer(venda).data)
+        except ObjectDoesNotExist:
+            return Response({'erro': 'Venda não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        except ValidationError as e:
+            return Response({'erro': e.messages}, status=status.HTTP_400_BAD_REQUEST)

@@ -60,3 +60,18 @@ class VendaService:
         self.venda_repo.atualizar_status(venda, StatusVenda.FINALIZADA)
         return venda
 
+    @transaction.atomic
+    def cancelar(self, venda_id, motivo, usuario=None):
+        venda = self.venda_repo.buscar_por_id(venda_id)
+
+        if venda.status == StatusVenda.CANCELADA:
+            raise ValidationError('Esta venda já está cancelada.')
+
+        if venda.status == StatusVenda.FINALIZADA:
+            for item in venda.itens.all():
+                produto = self.produto_repo.buscar_por_id(item.produto_id)
+                self.produto_repo.devolver_estoque(produto, item.quantidade)
+
+        self.venda_repo.cancelar(venda, motivo, usuario)
+        return venda
+
