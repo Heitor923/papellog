@@ -14,7 +14,10 @@ class VendaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Venda
-        fields = ['id', 'data', 'cliente_id', 'usuario_id', 'total', 'status', 'itens']
+        fields = [
+            'id', 'data', 'cliente_id', 'usuario_id', 'total', 'status', 'itens',
+            'motivo_cancelamento', 'data_cancelamento', 'cancelado_por_id',
+        ]
 
 
 class ItemVendaCriarSerializer(serializers.Serializer):

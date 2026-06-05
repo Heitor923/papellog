@@ -18,6 +18,15 @@ class Venda(models.Model):
         choices=StatusVenda.choices,
         default=StatusVenda.PENDENTE,
     )
+    motivo_cancelamento = models.TextField(null=True, blank=True)
+    data_cancelamento = models.DateTimeField(null=True, blank=True)
+    cancelado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='vendas_canceladas',
+    )
 
     class Meta:
         db_table = 'vendas'

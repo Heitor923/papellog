@@ -1,4 +1,6 @@
-from core.models import ItemVenda, Venda
+from django.utils import timezone
+
+from core.models import ItemVenda, StatusVenda, Venda
 
 
 class VendaRepository:
@@ -29,3 +31,11 @@ class VendaRepository:
     def atualizar_status(self, venda, novo_status):
         venda.status = novo_status
         venda.save()
+
+    def cancelar(self, venda, motivo, usuario=None):
+        venda.status = StatusVenda.CANCELADA
+        venda.motivo_cancelamento = motivo
+        venda.data_cancelamento = timezone.now()
+        venda.cancelado_por = usuario
+        venda.save()
+        return venda

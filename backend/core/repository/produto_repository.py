@@ -13,6 +13,10 @@ class ProdutoRepository:
         produto.estoqueAtual -= quantidade
         produto.save()
 
+    def devolver_estoque(self, produto, quantidade):
+        produto.estoqueAtual += quantidade
+        produto.save()
+
     def salvar(self, dados_produto):
         return Produto.objects.create(**dados_produto)
 

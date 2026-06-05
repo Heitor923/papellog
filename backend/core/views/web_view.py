@@ -100,6 +100,8 @@ def excluir_cliente(request, cliente_id):
     if request.user.perfil != PerfilUsuario.ADMIN:
         messages.error(request, 'Apenas administradores podem excluir clientes.')
         return redirect('/web/clientes/')
+    if request.method != 'POST':
+        return redirect('/web/clientes/')
     try:
         ClienteService().excluir(cliente_id)
         messages.success(request, 'Cliente excluído com sucesso.')
@@ -174,6 +176,8 @@ def excluir_produto(request, produto_id):
     if request.user.perfil != PerfilUsuario.ADMIN:
         messages.error(request, 'Apenas administradores podem excluir produtos.')
         return redirect('/web/produtos/')
+    if request.method != 'POST':
+        return redirect('/web/produtos/')
     try:
         ProdutoService().excluir(produto_id)
         messages.success(request, 'Produto excluído com sucesso.')
@@ -225,6 +229,18 @@ def finalizar_venda(request, venda_id):
         messages.success(request, 'Venda finalizada com sucesso.')
     except Exception as e:
         messages.error(request, str(e))
+    return redirect('/web/vendas/')
+
+
+@login_required(login_url='/web/login/')
+def cancelar_venda(request, venda_id):
+    if request.method == 'POST':
+        motivo = request.POST.get('motivo', '')
+        try:
+            VendaService().cancelar(venda_id, motivo, request.user)
+            messages.success(request, 'Venda cancelada com sucesso.')
+        except Exception as e:
+            messages.error(request, str(e))
     return redirect('/web/vendas/')
 
 

@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from core.models import Cliente, Produto, Usuario
+from core.models import Cliente, Produto, StatusVenda, Usuario
 from core.service import VendaService
 
 
@@ -77,3 +77,48 @@ class VendaServiceTest(TestCase):
         self.service.finalizar(venda.id)
         with self.assertRaises(ValidationError):
             self.service.finalizar(venda.id)
+
+    # --- Cancelamento ---
+
+    def test_cancelar_venda_pendente_muda_status(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.cancelar(venda.id, 'Desistência do cliente')
+        venda.refresh_from_db()
+        self.assertEqual(venda.status, StatusVenda.CANCELADA)
+
+    def test_cancelar_venda_pendente_nao_altera_estoque(self):
+        venda = self.service.criar(self._dados_venda())  # quantidade=2
+        self.service.cancelar(venda.id, 'Desistência')
+        self.produto.refresh_from_db()
+        self.assertEqual(self.produto.estoqueAtual, 10)  # estoque intacto
+
+    def test_cancelar_venda_finalizada_devolve_estoque(self):
+        venda = self.service.criar(self._dados_venda())  # quantidade=2
+        self.service.finalizar(venda.id)  # estoqueAtual: 10 - 2 = 8
+        self.service.cancelar(venda.id, 'Devolução solicitada')
+        self.produto.refresh_from_db()
+        self.assertEqual(self.produto.estoqueAtual, 10)  # 8 + 2 = 10
+
+    def test_cancelar_venda_ja_cancelada_levanta_erro(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.cancelar(venda.id, 'Primeiro cancelamento')
+        with self.assertRaises(ValidationError):
+            self.service.cancelar(venda.id, 'Segundo cancelamento')
+
+    def test_cancelamento_salva_motivo(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.cancelar(venda.id, 'Produto em falta')
+        venda.refresh_from_db()
+        self.assertEqual(venda.motivo_cancelamento, 'Produto em falta')
+
+    def test_cancelamento_salva_data(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.cancelar(venda.id, 'Teste de data')
+        venda.refresh_from_db()
+        self.assertIsNotNone(venda.data_cancelamento)
+
+    def test_cancelamento_salva_usuario(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.cancelar(venda.id, 'Cancelado pelo usuário', self.usuario)
+        venda.refresh_from_db()
+        self.assertEqual(venda.cancelado_por, self.usuario)
