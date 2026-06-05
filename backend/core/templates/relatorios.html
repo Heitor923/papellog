@@ -2,91 +2,221 @@
 
 {% block conteudo %}
 
-<h3>Relatórios de Vendas</h3>
+<style>
+.dash-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 20px 0 28px;
+}
+.dash-card {
+    flex: 1;
+    min-width: 140px;
+    background: #fff8f2;
+    border-left: 4px solid #e07820;
+    border-radius: 4px;
+    padding: 14px 18px;
+}
+.dash-card .titulo {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+.dash-card .valor {
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: #e07820;
+}
+.dash-card.alerta { border-left-color: #cc2222; }
+.dash-card.alerta .valor { color: #cc2222; }
+.dash-card.neutro { border-left-color: #aaa; }
+.dash-card.neutro .valor { color: #555; }
+.filtro-form {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+.filtro-form label { display: inline-block; margin-right: 20px; margin-bottom: 8px; }
+.filtro-form .acoes { margin-top: 10px; }
+.dash-secao { margin-bottom: 28px; }
+</style>
 
-<h4>Filtrar por período</h4>
-<form method="get">
-    <p>
-        <label style="display:inline; margin-right:16px;">
-            Data inicial: <input type="date" name="inicio" value="{{ inicio }}">
-        </label>
-        <label style="display:inline; margin-right:16px;">
-            Data final: <input type="date" name="fim" value="{{ fim }}">
-        </label>
-        <button type="submit">Buscar</button>
-    </p>
-</form>
+<h3>Relatórios Avançados</h3>
 
-<h4>Filtrar por cliente</h4>
-<form method="get">
-    <p>
-        <label style="display:inline; margin-right:16px;">
-            ID do cliente: <input type="number" name="cliente_id" value="{{ cliente_id }}" style="width:100px;">
+<div class="filtro-form">
+    <form method="get">
+        <label>Data inicial:
+            <input type="date" name="data_inicio" value="{{ filtros.data_inicio }}">
         </label>
-        <button type="submit">Buscar</button>
-    </p>
-</form>
-
-<hr>
+        <label>Data final:
+            <input type="date" name="data_fim" value="{{ filtros.data_fim }}">
+        </label>
+        <label>Cliente:
+            <select name="cliente_id">
+                <option value="">Todos</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente.id }}" {% if filtros.cliente_id == cliente.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cliente.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Funcionário:
+            <select name="usuario_id">
+                <option value="">Todos</option>
+                {% for usuario in usuarios %}
+                <option value="{{ usuario.id }}" {% if filtros.usuario_id == usuario.id|stringformat:"s" %}selected{% endif %}>
+                    {{ usuario.nome|default:usuario.username }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Status:
+            <select name="status">
+                <option value="">Todos</option>
+                {% for valor, label in status_choices %}
+                <option value="{{ valor }}" {% if filtros.status == valor %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <div class="acoes">
+            <button type="submit">Filtrar</button>
+            &nbsp;
+            <a href="/web/relatorios/" class="btn" style="background:#888;">Limpar filtros</a>
+        </div>
+    </form>
+</div>
 
 {% if erro %}
-    <div class="msg-erro">{{ erro }}</div>
+<div class="msg-erro">{{ erro }}</div>
 {% endif %}
 
-{% if inicio or cliente_id %}
+{% if relatorio %}
 
-    {% if resultado %}
+<div class="dash-cards">
+    <div class="dash-card">
+        <div class="titulo">Total vendido</div>
+        <div class="valor">R$ {{ relatorio.total_vendido|floatformat:2 }}</div>
+    </div>
+    <div class="dash-card">
+        <div class="titulo">Qtd. de vendas</div>
+        <div class="valor">{{ relatorio.quantidade_vendas }}</div>
+    </div>
+    <div class="dash-card">
+        <div class="titulo">Ticket médio</div>
+        <div class="valor">R$ {{ relatorio.ticket_medio|floatformat:2 }}</div>
+    </div>
+    <div class="dash-card neutro">
+        <div class="titulo">Pendentes</div>
+        <div class="valor">{{ relatorio.quantidade_pendentes }}</div>
+    </div>
+    <div class="dash-card {% if relatorio.quantidade_canceladas > 0 %}alerta{% else %}neutro{% endif %}">
+        <div class="titulo">Canceladas</div>
+        <div class="valor">{{ relatorio.quantidade_canceladas }}</div>
+    </div>
+</div>
 
-        <div class="resumo">
-            <div>
-                <strong>Vendas encontradas</strong>
-                <span>{{ quantidade_vendas }}</span>
-            </div>
-            <div>
-                <strong>Total vendido</strong>
-                <span>R$ {{ total_vendido }}</span>
-            </div>
-        </div>
+<div class="dash-secao">
+    <h4>Ranking de produtos <small style="font-weight:normal; color:#888;">(top 10 — apenas FINALIZADAS)</small></h4>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Produto</th>
+            <th>SKU</th>
+            <th>Qtd. vendida</th>
+            <th>Valor vendido</th>
+        </tr>
+        {% for item in relatorio.ranking_produtos %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.produto__nome }}</td>
+            <td>{{ item.produto__sku }}</td>
+            <td>{{ item.quantidade_vendida }}</td>
+            <td>R$ {{ item.valor_vendido|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum produto vendido no período.</td></tr>
+        {% endfor %}
+    </table>
+</div>
 
-        {% if produtos_vendidos %}
-        <h4>Produtos vendidos no período</h4>
-        <table style="width:auto;">
-            <tr>
-                <th>Produto</th>
-                <th>Qtd. total vendida</th>
-            </tr>
-            {% for nome, qtd in produtos_vendidos.items %}
-            <tr>
-                <td>{{ nome }}</td>
-                <td>{{ qtd }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% endif %}
+<div class="dash-secao">
+    <h4>Ranking de funcionários <small style="font-weight:normal; color:#888;">(top 10 — apenas FINALIZADAS)</small></h4>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Funcionário</th>
+            <th>Username</th>
+            <th>Qtd. de vendas</th>
+            <th>Valor vendido</th>
+        </tr>
+        {% for item in relatorio.ranking_funcionarios %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.usuario__nome|default:item.usuario__username }}</td>
+            <td>{{ item.usuario__username }}</td>
+            <td>{{ item.quantidade_vendas }}</td>
+            <td>R$ {{ item.valor_vendido|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum funcionário com vendas no período.</td></tr>
+        {% endfor %}
+    </table>
+</div>
 
-        <h4>Detalhamento das vendas</h4>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Data</th>
-                <th>Cliente</th>
-                <th>Total</th>
-                <th>Status</th>
-            </tr>
-            {% for venda in resultado %}
-            <tr>
-                <td>{{ venda.id }}</td>
-                <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
-                <td>{{ venda.cliente.nome }}</td>
-                <td>R$ {{ venda.total }}</td>
-                <td>{{ venda.status }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+<div class="dash-secao">
+    <h4>Produtos críticos <small style="font-weight:normal; color:#888;">(estoque atual ≤ estoque mínimo)</small></h4>
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>SKU</th>
+            <th>Estoque atual</th>
+            <th>Estoque mínimo</th>
+            <th>Diferença</th>
+        </tr>
+        {% for item in relatorio.produtos_criticos %}
+        <tr>
+            <td>{{ item.produto.nome }}</td>
+            <td>{{ item.produto.sku }}</td>
+            <td class="estoque-baixo">{{ item.produto.estoqueAtual }}</td>
+            <td>{{ item.produto.estoqueMinimo }}</td>
+            <td class="estoque-baixo">-{{ item.diferenca }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Todos os produtos estão com estoque adequado.</td></tr>
+        {% endfor %}
+    </table>
+</div>
 
-    {% else %}
-        <p>Nenhuma venda encontrada para o filtro informado.</p>
-    {% endif %}
+<div class="dash-secao">
+    <h4>Vendas no período <small style="font-weight:normal; color:#888;">({{ relatorio.quantidade_vendas }} registros)</small></h4>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Funcionário</th>
+            <th>Total</th>
+            <th>Status</th>
+        </tr>
+        {% for venda in relatorio.vendas %}
+        <tr>
+            <td>{{ venda.id }}</td>
+            <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
+            <td>{{ venda.cliente.nome }}</td>
+            <td>{{ venda.usuario.nome|default:venda.usuario.username }}</td>
+            <td>R$ {{ venda.total|floatformat:2 }}</td>
+            <td>{{ venda.status }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">Nenhuma venda encontrada.</td></tr>
+        {% endfor %}
+    </table>
+</div>
 
 {% endif %}
 

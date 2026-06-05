@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from core.models.usuario import PerfilUsuario
-from core.service import ClienteService, IAService, ProdutoService, RelatorioService, UsuarioService, VendaService
+from core.service import ClienteService, IAService, ProdutoService, RelatorioAvancadoService, RelatorioService, UsuarioService, VendaService
 
 
 def tela_login(request):
@@ -343,40 +343,35 @@ def redefinir_senha(request, usuario_id):
     return render(request, 'redefinir_senha.html', {'usuario': usuario})
 
 
-# --- Relatórios ---
+# --- Relatórios Avançados ---
 
 @login_required(login_url='/web/login/')
 def tela_relatorios(request):
-    inicio = request.GET.get('inicio', '')
-    fim = request.GET.get('fim', '')
-    cliente_id = request.GET.get('cliente_id', '')
-    vendas = []
+    filtros_raw = {
+        'data_inicio': request.GET.get('data_inicio', ''),
+        'data_fim': request.GET.get('data_fim', ''),
+        'cliente_id': request.GET.get('cliente_id', ''),
+        'usuario_id': request.GET.get('usuario_id', ''),
+        'status': request.GET.get('status', ''),
+    }
+
+    relatorio = None
     erro = ''
 
-    if inicio and fim:
-        try:
-            vendas = list(RelatorioService().vendas_por_periodo(inicio, fim))
-        except Exception as e:
-            erro = str(e)
-    elif cliente_id:
-        vendas = list(RelatorioService().vendas_por_cliente(cliente_id))
-
-    total_vendido = sum(v.total for v in vendas)
-    quantidade_vendas = len(vendas)
-
-    produtos_vendidos = {}
-    for venda in vendas:
-        for item in venda.itens.select_related('produto'):
-            nome = item.produto.nome
-            produtos_vendidos[nome] = produtos_vendidos.get(nome, 0) + item.quantidade
+    try:
+        relatorio = RelatorioAvancadoService().gerar(filtros_raw)
+    except Exception as e:
+        erro = str(e)
 
     return render(request, 'relatorios.html', {
-        'resultado': vendas,
-        'inicio': inicio,
-        'fim': fim,
-        'cliente_id': cliente_id,
+        'filtros': filtros_raw,
+        'relatorio': relatorio,
         'erro': erro,
-        'total_vendido': total_vendido,
-        'quantidade_vendas': quantidade_vendas,
-        'produtos_vendidos': produtos_vendidos,
+        'clientes': ClienteService().listar(),
+        'usuarios': UsuarioService().listar(),
+        'status_choices': [
+            ('PENDENTE', 'Pendente'),
+            ('FINALIZADA', 'Finalizada'),
+            ('CANCELADA', 'Cancelada'),
+        ],
     })
