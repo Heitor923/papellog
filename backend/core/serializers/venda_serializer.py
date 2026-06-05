@@ -17,6 +17,7 @@ class VendaSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'data', 'cliente_id', 'usuario_id', 'total', 'status', 'itens',
             'motivo_cancelamento', 'data_cancelamento', 'cancelado_por_id', 'autorizado_por_id',
+            'finalizado_por_id', 'data_finalizacao',
         ]
 
 
@@ -27,5 +28,4 @@ class ItemVendaCriarSerializer(serializers.Serializer):
 
 class VendaCriarSerializer(serializers.Serializer):
     cliente_id = serializers.IntegerField()
-    usuario_id = serializers.IntegerField()
     itens = ItemVendaCriarSerializer(many=True)

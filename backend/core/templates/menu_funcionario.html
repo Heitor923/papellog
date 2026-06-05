@@ -1,15 +1,63 @@
 {% extends 'base.html' %}
-
+{% block page_title %}Menu{% endblock %}
 {% block conteudo %}
 
-<h3>Menu — Funcionário</h3>
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Bem-vindo, {{ user.nome|default:user.username }}</h2>
+    <p>Acesso às operações do sistema</p>
+  </div>
+  <a href="/web/dashboard/" class="btn btn-primary">
+    <i class="bi bi-speedometer2"></i> Ir para o Dashboard
+  </a>
+</div>
 
-<ul>
-    <li><a href="/web/dashboard/">Dashboard</a> — visão geral</li>
-    <li><a href="/web/clientes/">Clientes</a> — cadastrar, editar</li>
-    <li><a href="/web/produtos/">Produtos</a> — visualizar</li>
-    <li><a href="/web/vendas/">Vendas</a> — registrar e finalizar</li>
-    <li><a href="/web/relatorios/">Relatórios</a> — por período e por cliente</li>
-</ul>
+<div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+  <a href="/web/dashboard/" style="text-decoration:none;">
+    <div class="stat-card">
+      <div class="stat-icon si-orange"><i class="bi bi-speedometer2"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Dashboard</div>
+        <div class="stat-sub">Visão geral</div>
+      </div>
+    </div>
+  </a>
+  <a href="/web/clientes/" style="text-decoration:none;">
+    <div class="stat-card">
+      <div class="stat-icon si-blue"><i class="bi bi-people"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Clientes</div>
+        <div class="stat-sub">Cadastrar e editar</div>
+      </div>
+    </div>
+  </a>
+  <a href="/web/produtos/" style="text-decoration:none;">
+    <div class="stat-card">
+      <div class="stat-icon si-purple"><i class="bi bi-box-seam"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Produtos</div>
+        <div class="stat-sub">Visualizar estoque</div>
+      </div>
+    </div>
+  </a>
+  <a href="/web/vendas/" style="text-decoration:none;">
+    <div class="stat-card">
+      <div class="stat-icon si-green"><i class="bi bi-cart3"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Vendas</div>
+        <div class="stat-sub">Registrar e finalizar</div>
+      </div>
+    </div>
+  </a>
+  <a href="/web/relatorios/" style="text-decoration:none;">
+    <div class="stat-card">
+      <div class="stat-icon si-yellow"><i class="bi bi-bar-chart-line"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Relatórios</div>
+        <div class="stat-sub">Consultar vendas</div>
+      </div>
+    </div>
+  </a>
+</div>
 
 {% endblock %}

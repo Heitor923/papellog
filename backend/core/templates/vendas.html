@@ -1,198 +1,244 @@
 {% extends 'base.html' %}
+{% block page_title %}Vendas{% endblock %}
 
 {% block conteudo %}
 
-<h3>Vendas</h3>
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Vendas</h2>
+    <p>Registre e acompanhe as vendas da loja</p>
+  </div>
+</div>
 
-<h4>Registrar Nova Venda</h4>
+<!-- ====== NOVA VENDA ====== -->
+<div class="card mb-6">
+  <div class="card-header"><i class="bi bi-cart-plus"></i> Registrar nova venda</div>
+  <div class="card-body">
 
-<p>
-    <label>Produto:
-        <select id="prod_sel">
-            <option value="">— selecione —</option>
-            {% for produto in produtos %}
-            <option value="{{ produto.id }}">{{ produto.nome }} — R$ {{ produto.preco }} (estoque: {{ produto.estoqueAtual }})</option>
+    <div class="d-flex gap-3 items-center mb-4" style="flex-wrap:wrap;">
+      <select id="prod_sel" class="form-control" style="max-width:340px;">
+        <option value="">— Selecionar produto —</option>
+        {% for produto in produtos %}
+        <option value="{{ produto.id }}">{{ produto.nome }} — R$ {{ produto.preco }} (estoque: {{ produto.estoqueAtual }})</option>
+        {% endfor %}
+      </select>
+      <div class="d-flex gap-2 items-center">
+        <label class="form-label mb-0" style="white-space:nowrap;">Qtd.:</label>
+        <input type="number" id="qtd_in" class="form-control" style="width:80px;" min="1" value="1">
+      </div>
+      <button type="button" class="btn btn-outline" onclick="adicionarItem()">
+        <i class="bi bi-plus"></i> Adicionar
+      </button>
+    </div>
+
+    <div class="table-wrap mb-4">
+      <table>
+        <thead><tr><th>Produto</th><th>Quantidade</th><th></th></tr></thead>
+        <tbody id="corpo_carrinho">
+          <tr id="linha_vazia"><td colspan="3" class="text-muted text-sm" style="padding:16px; text-align:center;">Nenhum item adicionado.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" id="formVenda">
+      {% csrf_token %}
+      <div class="d-flex gap-3 items-center" style="flex-wrap:wrap;">
+        <div class="form-group" style="margin:0; min-width:200px; flex:1;">
+          <select name="cliente_id" class="form-control" required>
+            <option value="">Selecionar cliente...</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
             {% endfor %}
-        </select>
-    </label>
-    &nbsp;
-    <label>Quantidade: <input type="number" id="qtd_in" min="1" value="1"></label>
-    &nbsp;
-    <button type="button" onclick="adicionarItem()">Adicionar ao carrinho</button>
-</p>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-check2-circle"></i> Registrar venda
+        </button>
+      </div>
+    </form>
 
-<table border="1" cellpadding="5">
-    <thead>
-        <tr><th>Produto</th><th>Quantidade</th><th>Ação</th></tr>
-    </thead>
-    <tbody id="corpo_carrinho">
-        <tr id="linha_vazia"><td colspan="3">Carrinho vazio.</td></tr>
-    </tbody>
-</table>
+  </div>
+</div>
 
-<br>
+<!-- ====== CONTADORES ====== -->
+<div class="counter-bar">
+  <div class="counter-pill cp-pendente">
+    <i class="bi bi-hourglass-split"></i> Em progresso
+    <span class="n">{{ count_pendentes }}</span>
+  </div>
+  <div class="counter-pill cp-finalizada">
+    <i class="bi bi-check-circle"></i> Finalizadas
+    <span class="n">{{ count_finalizadas }}</span>
+  </div>
+  <div class="counter-pill cp-cancelada">
+    <i class="bi bi-x-circle"></i> Canceladas
+    <span class="n">{{ count_canceladas }}</span>
+  </div>
+</div>
 
-<form method="post" id="formVenda">
-    {% csrf_token %}
-    <p>
-        <label>Cliente:
-            <select name="cliente_id" required>
-                <option value="">Selecione...</option>
-                {% for cliente in clientes %}
-                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
-                {% endfor %}
-            </select>
-        </label>
-    </p>
-    <button type="submit">Registrar Venda</button>
-</form>
-
-<script>
-var contador = 0;
-var totalItens = 0;
-
-function adicionarItem() {
-    var select = document.getElementById('prod_sel');
-    var qtdInput = document.getElementById('qtd_in');
-    var prodId = select.value;
-    var prodNome = select.options[select.selectedIndex].text;
-    var qtd = parseInt(qtdInput.value);
-
-    if (!prodId) {
-        alert('Selecione um produto.');
-        return;
-    }
-    if (isNaN(qtd) || qtd <= 0) {
-        alert('Informe uma quantidade válida.');
-        return;
-    }
-
-    contador++;
-    totalItens++;
-    var id = contador;
-
-    document.getElementById('linha_vazia').style.display = 'none';
-
-    var tbody = document.getElementById('corpo_carrinho');
-    var tr = document.createElement('tr');
-    tr.id = 'linha_' + id;
-    tr.innerHTML = '<td>' + prodNome + '</td>' +
-                   '<td>' + qtd + '</td>' +
-                   '<td><button type="button" onclick="removerItem(' + id + ')">Remover</button></td>';
-    tbody.appendChild(tr);
-
-    var form = document.getElementById('formVenda');
-
-    var hProd = document.createElement('input');
-    hProd.type = 'hidden';
-    hProd.name = 'produto_ids';
-    hProd.value = prodId;
-    hProd.id = 'h_prod_' + id;
-    form.appendChild(hProd);
-
-    var hQtd = document.createElement('input');
-    hQtd.type = 'hidden';
-    hQtd.name = 'quantidades';
-    hQtd.value = qtd;
-    hQtd.id = 'h_qtd_' + id;
-    form.appendChild(hQtd);
-
-    select.selectedIndex = 0;
-    qtdInput.value = 1;
-}
-
-function removerItem(id) {
-    var linha = document.getElementById('linha_' + id);
-    var hProd = document.getElementById('h_prod_' + id);
-    var hQtd  = document.getElementById('h_qtd_' + id);
-    if (linha)  linha.remove();
-    if (hProd)  hProd.remove();
-    if (hQtd)   hQtd.remove();
-
-    totalItens--;
-    if (totalItens === 0) {
-        document.getElementById('linha_vazia').style.display = '';
-    }
-}
-</script>
-
-<script>
-function confirmarCancelamento(form, exigirSenhaGerente) {
-    var motivo = prompt('Informe o motivo do cancelamento:');
-    if (motivo === null) return false;
-    if (motivo.trim() === '') {
-        alert('O motivo não pode ser vazio.');
-        return false;
-    }
-    form.querySelector('.motivo-input').value = motivo;
-
-    if (exigirSenhaGerente) {
-        var senha = prompt('Cancelamento requer autorização gerencial.\nInforme a senha do gerente:');
-        if (senha === null) return false;
-        if (senha.trim() === '') {
-            alert('A senha gerencial é obrigatória.');
-            return false;
-        }
-        form.querySelector('.senha-gerente-input').value = senha;
-    }
-    return true;
-}
-</script>
-
-<hr>
-
-<h4>Vendas Registradas</h4>
-<table border="1" cellpadding="5">
-    <tr>
-        <th>ID</th>
-        <th>Data</th>
-        <th>Cliente</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Ações</th>
-    </tr>
-    {% for venda in vendas %}
-    <tr>
-        <td>{{ venda.id }}</td>
-        <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
-        <td>{{ venda.cliente.nome }}</td>
-        <td>R$ {{ venda.total }}</td>
-        <td>{{ venda.status }}</td>
-        <td>
-            {% if venda.status == 'PENDENTE' %}
-            <form method="post" action="/web/vendas/{{ venda.id }}/finalizar/" style="display:inline;">
+<!-- ====== PENDENTES ====== -->
+<div class="section-wrap">
+  <div class="section-header sh-pendente">
+    <h5><i class="bi bi-hourglass-split"></i> Em progresso — Pendentes</h5>
+    <span class="badge badge-pendente">{{ count_pendentes }}</span>
+  </div>
+  <div class="section-table">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for venda in vendas_pendentes %}
+        <tr>
+          <td class="td-id">#{{ venda.id }}</td>
+          <td class="text-muted text-sm">{{ venda.data|date:"d/m/Y H:i" }}</td>
+          <td class="td-strong">{{ venda.cliente.nome }}</td>
+          <td class="font-semibold">R$ {{ venda.total|floatformat:2 }}</td>
+          <td>
+            <div class="td-actions">
+              <form method="post" action="/web/vendas/{{ venda.id }}/finalizar/" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit">Finalizar</button>
-            </form>
-            {% endif %}
-            {% if venda.status != 'CANCELADA' %}
-            <form method="post" action="/web/vendas/{{ venda.id }}/cancelar/" style="display:inline;"
-                  {% if request.user.perfil == 'FUNCIONARIO' %}
-                  onsubmit="return confirmarCancelamento(this, true);"
-                  {% else %}
-                  onsubmit="return confirmarCancelamento(this, false);"
-                  {% endif %}>
+                <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check2-circle"></i> Finalizar</button>
+              </form>
+              <form method="post" action="/web/vendas/{{ venda.id }}/cancelar/" style="display:inline;"
+                    {% if request.user.perfil == 'FUNCIONARIO' %}onsubmit="return confirmarCancelamento(this, true);"{% else %}onsubmit="return confirmarCancelamento(this, false);"{% endif %}>
                 {% csrf_token %}
                 <input type="hidden" name="motivo" class="motivo-input">
                 <input type="hidden" name="senha_operacional_gerente" class="senha-gerente-input">
-                <button type="submit">Cancelar</button>
-            </form>
-            {% else %}
-            <em>Cancelada</em>
-            {% if venda.motivo_cancelamento %}
-            <br><small>Motivo: {{ venda.motivo_cancelamento }}</small>
-            {% endif %}
-            {% if venda.data_cancelamento %}
-            <br><small>Em: {{ venda.data_cancelamento|date:"d/m/Y H:i" }}</small>
-            {% endif %}
-            {% endif %}
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="6">Nenhuma venda registrada.</td>
-    </tr>
-    {% endfor %}
-</table>
+                <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-x-circle"></i> Cancelar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state" style="padding:24px;"><i class="bi bi-hourglass"></i><p>Nenhuma venda pendente.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
+<!-- ====== FINALIZADAS ====== -->
+<div class="section-wrap">
+  <div class="section-header sh-finalizada">
+    <h5><i class="bi bi-check-circle"></i> Concluídas — Finalizadas</h5>
+    <span class="badge badge-finalizada">{{ count_finalizadas }}</span>
+  </div>
+  <div class="section-table">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Finalizado por</th><th>Data finalização</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for venda in vendas_finalizadas %}
+        <tr>
+          <td class="td-id">#{{ venda.id }}</td>
+          <td class="text-muted text-sm">{{ venda.data|date:"d/m/Y H:i" }}</td>
+          <td class="td-strong">{{ venda.cliente.nome }}</td>
+          <td class="font-semibold">R$ {{ venda.total|floatformat:2 }}</td>
+          <td>
+            {% if venda.finalizado_por %}
+            <span class="text-sm">{{ venda.finalizado_por.nome|default:venda.finalizado_por.username }}</span>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td class="text-muted text-sm">
+            {% if venda.data_finalizacao %}{{ venda.data_finalizacao|date:"d/m/Y H:i" }}{% else %}—{% endif %}
+          </td>
+          <td>
+            <form method="post" action="/web/vendas/{{ venda.id }}/cancelar/" style="display:inline;"
+                  {% if request.user.perfil == 'FUNCIONARIO' %}onsubmit="return confirmarCancelamento(this, true);"{% else %}onsubmit="return confirmarCancelamento(this, false);"{% endif %}>
+              {% csrf_token %}
+              <input type="hidden" name="motivo" class="motivo-input">
+              <input type="hidden" name="senha_operacional_gerente" class="senha-gerente-input">
+              <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-x-circle"></i> Cancelar</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state" style="padding:24px;"><i class="bi bi-check-all"></i><p>Nenhuma venda finalizada.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ====== CANCELADAS ====== -->
+<div class="section-wrap">
+  <div class="section-header sh-cancelada">
+    <h5><i class="bi bi-x-circle"></i> Canceladas</h5>
+    <span class="badge badge-cancelada">{{ count_canceladas }}</span>
+  </div>
+  <div class="section-table">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Motivo</th><th>Cancelado por</th><th>Autorizado por</th><th>Data cancel.</th></tr>
+      </thead>
+      <tbody>
+        {% for venda in vendas_canceladas %}
+        <tr>
+          <td class="td-id">#{{ venda.id }}</td>
+          <td class="text-muted text-sm">{{ venda.data|date:"d/m/Y H:i" }}</td>
+          <td class="td-strong">{{ venda.cliente.nome }}</td>
+          <td class="font-semibold">R$ {{ venda.total|floatformat:2 }}</td>
+          <td class="text-sm">{{ venda.motivo_cancelamento|default:"—" }}</td>
+          <td class="text-sm">{% if venda.cancelado_por %}{{ venda.cancelado_por.nome|default:venda.cancelado_por.username }}{% else %}—{% endif %}</td>
+          <td class="text-sm">{% if venda.autorizado_por %}{{ venda.autorizado_por.nome|default:venda.autorizado_por.username }}{% else %}—{% endif %}</td>
+          <td class="text-muted text-sm">{% if venda.data_cancelamento %}{{ venda.data_cancelamento|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state" style="padding:24px;"><i class="bi bi-archive"></i><p>Nenhuma venda cancelada.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+var contador = 0, totalItens = 0;
+
+function adicionarItem() {
+  var sel = document.getElementById('prod_sel');
+  var qtdIn = document.getElementById('qtd_in');
+  var prodId = sel.value;
+  var prodNome = sel.options[sel.selectedIndex].text;
+  var qtd = parseInt(qtdIn.value);
+  if (!prodId) { alert('Selecione um produto.'); return; }
+  if (isNaN(qtd) || qtd <= 0) { alert('Informe uma quantidade válida.'); return; }
+  contador++; totalItens++;
+  var id = contador;
+  document.getElementById('linha_vazia').style.display = 'none';
+  var tbody = document.getElementById('corpo_carrinho');
+  var tr = document.createElement('tr');
+  tr.id = 'linha_' + id;
+  tr.innerHTML = '<td class="td-strong">' + prodNome + '</td><td>' + qtd + '</td>' +
+    '<td><button type="button" class="btn btn-danger btn-sm" onclick="removerItem(' + id + ')"><i class="bi bi-trash"></i></button></td>';
+  tbody.appendChild(tr);
+  var form = document.getElementById('formVenda');
+  var hP = document.createElement('input'); hP.type='hidden'; hP.name='produto_ids'; hP.value=prodId; hP.id='h_prod_'+id; form.appendChild(hP);
+  var hQ = document.createElement('input'); hQ.type='hidden'; hQ.name='quantidades'; hQ.value=qtd; hQ.id='h_qtd_'+id; form.appendChild(hQ);
+  sel.selectedIndex = 0; qtdIn.value = 1;
+}
+
+function removerItem(id) {
+  ['linha_','h_prod_','h_qtd_'].forEach(function(prefix){ var el=document.getElementById(prefix+id); if(el) el.remove(); });
+  if(--totalItens === 0) document.getElementById('linha_vazia').style.display='';
+}
+
+function confirmarCancelamento(form, exigirSenha) {
+  var motivo = prompt('Informe o motivo do cancelamento:');
+  if (motivo === null) return false;
+  if (!motivo.trim()) { alert('O motivo não pode ser vazio.'); return false; }
+  form.querySelector('.motivo-input').value = motivo;
+  if (exigirSenha) {
+    var senha = prompt('Cancelamento requer autorização gerencial.\nInforme a senha do gerente:');
+    if (senha === null) return false;
+    if (!senha.trim()) { alert('A senha gerencial é obrigatória.'); return false; }
+    form.querySelector('.senha-gerente-input').value = senha;
+  }
+  return true;
+}
+</script>
 {% endblock %}

@@ -34,6 +34,14 @@ class Venda(models.Model):
         on_delete=models.PROTECT,
         related_name='vendas_autorizadas',
     )
+    finalizado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='vendas_finalizadas',
+    )
+    data_finalizacao = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'vendas'

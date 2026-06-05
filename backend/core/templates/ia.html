@@ -1,63 +1,76 @@
 {% extends 'base.html' %}
-
+{% block page_title %}Análise de Vendas{% endblock %}
 {% block conteudo %}
 
-<h3>Análise de Vendas</h3>
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Análise de Vendas</h2>
+    <p>Insights sobre o desempenho dos produtos</p>
+  </div>
+</div>
 
-<h4>Produtos mais vendidos</h4>
-<table>
-    <tr>
-        <th>Produto</th>
-        <th>Quantidade total vendida</th>
-    </tr>
-    {% for item in mais_vendidos %}
-    <tr>
-        <td>{{ item.produto_nome }}</td>
-        <td>{{ item.total_vendido }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="2">Nenhuma venda registrada ainda.</td></tr>
-    {% endfor %}
-</table>
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:24px;">
 
-<br>
+  <div class="table-wrap">
+    <div class="table-head">
+      <div class="table-head-title"><i class="bi bi-trophy text-muted"></i> Mais vendidos</div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Produto</th><th>Qtd. total vendida</th></tr></thead>
+      <tbody>
+        {% for item in mais_vendidos %}
+        <tr>
+          <td class="td-id">{{ forloop.counter }}</td>
+          <td class="td-strong">{{ item.produto_nome }}</td>
+          <td class="font-semibold text-success">{{ item.total_vendido }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3"><div class="empty-state" style="padding:24px;"><i class="bi bi-cart-x"></i><p>Nenhuma venda registrada ainda.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-<h4>Produtos menos vendidos</h4>
-<table>
-    <tr>
-        <th>Produto</th>
-        <th>Quantidade total vendida</th>
-    </tr>
-    {% for item in menos_vendidos %}
-    <tr>
-        <td>{{ item.produto_nome }}</td>
-        <td>{{ item.total_vendido }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="2">Nenhuma venda registrada ainda.</td></tr>
-    {% endfor %}
-</table>
+  <div class="table-wrap">
+    <div class="table-head">
+      <div class="table-head-title"><i class="bi bi-arrow-down-circle text-muted"></i> Menos vendidos</div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Produto</th><th>Qtd. total vendida</th></tr></thead>
+      <tbody>
+        {% for item in menos_vendidos %}
+        <tr>
+          <td class="td-id">{{ forloop.counter }}</td>
+          <td class="td-strong">{{ item.produto_nome }}</td>
+          <td class="font-semibold text-warning">{{ item.total_vendido }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3"><div class="empty-state" style="padding:24px;"><i class="bi bi-cart-x"></i><p>Nenhuma venda registrada ainda.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-<br>
+</div>
 
-<h4>Produtos parados <small style="font-weight:normal; color:#888;">(sem nenhuma venda registrada)</small></h4>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>SKU</th>
-        <th>Estoque atual</th>
-    </tr>
-    {% for produto in parados %}
-    <tr>
-        <td>{{ produto.id }}</td>
-        <td>{{ produto.nome }}</td>
-        <td>{{ produto.sku }}</td>
+<div class="table-wrap">
+  <div class="table-head">
+    <div class="table-head-title"><i class="bi bi-slash-circle text-muted"></i> Produtos parados <span class="text-xs text-muted">(sem nenhuma venda registrada)</span></div>
+  </div>
+  <table>
+    <thead><tr><th>Nome</th><th>SKU</th><th>Estoque atual</th></tr></thead>
+    <tbody>
+      {% for produto in parados %}
+      <tr>
+        <td class="td-strong">{{ produto.nome }}</td>
+        <td class="td-mono text-muted">{{ produto.sku }}</td>
         <td>{{ produto.estoqueAtual }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="4">Todos os produtos têm pelo menos uma venda registrada.</td></tr>
-    {% endfor %}
-</table>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3"><div class="empty-state" style="padding:24px;"><i class="bi bi-check-all"></i><p>Todos os produtos têm pelo menos uma venda registrada.</p></div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 {% endblock %}
