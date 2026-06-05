@@ -117,7 +117,7 @@ function removerItem(id) {
 </script>
 
 <script>
-function confirmarCancelamento(form) {
+function confirmarCancelamento(form, exigirSenhaGerente) {
     var motivo = prompt('Informe o motivo do cancelamento:');
     if (motivo === null) return false;
     if (motivo.trim() === '') {
@@ -125,6 +125,16 @@ function confirmarCancelamento(form) {
         return false;
     }
     form.querySelector('.motivo-input').value = motivo;
+
+    if (exigirSenhaGerente) {
+        var senha = prompt('Cancelamento requer autorização gerencial.\nInforme a senha do gerente:');
+        if (senha === null) return false;
+        if (senha.trim() === '') {
+            alert('A senha gerencial é obrigatória.');
+            return false;
+        }
+        form.querySelector('.senha-gerente-input').value = senha;
+    }
     return true;
 }
 </script>
@@ -157,9 +167,14 @@ function confirmarCancelamento(form) {
             {% endif %}
             {% if venda.status != 'CANCELADA' %}
             <form method="post" action="/web/vendas/{{ venda.id }}/cancelar/" style="display:inline;"
-                  onsubmit="return confirmarCancelamento(this);">
+                  {% if request.user.perfil == 'FUNCIONARIO' %}
+                  onsubmit="return confirmarCancelamento(this, true);"
+                  {% else %}
+                  onsubmit="return confirmarCancelamento(this, false);"
+                  {% endif %}>
                 {% csrf_token %}
                 <input type="hidden" name="motivo" class="motivo-input">
+                <input type="hidden" name="senha_operacional_gerente" class="senha-gerente-input">
                 <button type="submit">Cancelar</button>
             </form>
             {% else %}

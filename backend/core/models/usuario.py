@@ -15,6 +15,7 @@ class Usuario(AbstractUser):
         default=PerfilUsuario.FUNCIONARIO,
     )
     ativo = models.BooleanField(default=True)
+    senha_operacional = models.CharField(max_length=128, null=True, blank=True)
 
     class Meta:
         db_table = 'usuarios'

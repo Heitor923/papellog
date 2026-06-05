@@ -18,6 +18,15 @@
         </label>
     </p>
     <p><label><input type="checkbox" name="ativo" {% if usuario.ativo %}checked{% endif %}> Ativo</label></p>
+    {% if usuario.perfil == 'ADMIN' %}
+    <hr>
+    <p>
+        <label>Senha gerencial de autorização (cancelamentos):
+            <input type="password" name="senha_operacional" placeholder="Deixe vazio para não alterar">
+        </label>
+        <br><small>Funcionários usam esta senha para confirmar cancelamentos de venda.</small>
+    </p>
+    {% endif %}
     <button type="submit">Salvar</button>
     <a href="/web/usuarios/">Cancelar</a>
 </form>

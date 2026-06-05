@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<style>
+.dash-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.dash-card {
+    flex: 1;
+    min-width: 150px;
+    background: #fff8f2;
+    border-left: 4px solid #e07820;
+    border-radius: 4px;
+    padding: 14px 18px;
+}
+.dash-card .titulo {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+.dash-card .valor {
+    font-size: 1.9rem;
+    font-weight: bold;
+    color: #e07820;
+}
+.dash-card.alerta { border-left-color: #cc2222; }
+.dash-card.alerta .valor { color: #cc2222; }
+.dash-card.neutro { border-left-color: #aaa; }
+.dash-card.neutro .valor { color: #555; }
+.dash-secao { margin-bottom: 28px; }
+.dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+@media (max-width: 800px) { .dash-grid { grid-template-columns: 1fr; } }
+</style>
+
+<h3>Dashboard</h3>
+
+<div class="dash-cards">
+    <div class="dash-card">
+        <div class="titulo">Vendas do dia</div>
+        <div class="valor">{{ vendas_do_dia }}</div>
+    </div>
+    <div class="dash-card">
+        <div class="titulo">Total vendido no mês</div>
+        <div class="valor">R$ {{ total_mes|floatformat:2 }}</div>
+    </div>
+    <div class="dash-card">
+        <div class="titulo">Produtos cadastrados</div>
+        <div class="valor">{{ produtos_cadastrados }}</div>
+    </div>
+    <div class="dash-card {% if estoque_baixo_count > 0 %}alerta{% endif %}">
+        <div class="titulo">Estoque baixo</div>
+        <div class="valor">{{ estoque_baixo_count }}</div>
+    </div>
+    <div class="dash-card neutro">
+        <div class="titulo">Vendas pendentes</div>
+        <div class="valor">{{ vendas_pendentes }}</div>
+    </div>
+    <div class="dash-card neutro">
+        <div class="titulo">Vendas canceladas</div>
+        <div class="valor">{{ vendas_canceladas }}</div>
+    </div>
+</div>
+
+<div class="dash-secao">
+    <h4>Últimas vendas</h4>
+    <table>
+        <tr>
+            <th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th>
+        </tr>
+        {% for venda in ultimas_vendas %}
+        <tr>
+            <td>{{ venda.id }}</td>
+            <td>{{ venda.data|date:"d/m/Y H:i" }}</td>
+            <td>{{ venda.cliente.nome }}</td>
+            <td>R$ {{ venda.total|floatformat:2 }}</td>
+            <td>{{ venda.status }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhuma venda registrada.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+<hr>
+<h3>Análise de Vendas</h3>
+
+<div class="dash-grid">
+
+    <div class="dash-secao">
+        <h4>Produtos mais vendidos</h4>
+        <table>
+            <tr><th>Produto</th><th>SKU</th><th>Qtd. vendida</th></tr>
+            {% for item in mais_vendidos %}
+            <tr>
+                <td>{{ item.produto__nome }}</td>
+                <td>{{ item.produto__sku }}</td>
+                <td>{{ item.total_vendido }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Nenhuma venda registrada ainda.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="dash-secao">
+        <h4>Produtos menos vendidos</h4>
+        <table>
+            <tr><th>Produto</th><th>SKU</th><th>Qtd. vendida</th></tr>
+            {% for item in menos_vendidos %}
+            <tr>
+                <td>{{ item.produto__nome }}</td>
+                <td>{{ item.produto__sku }}</td>
+                <td>{{ item.total_vendido }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Nenhuma venda registrada ainda.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+<div class="dash-secao">
+    <h4>Produtos parados <small style="font-weight:normal; color:#888;">(sem nenhuma venda registrada)</small></h4>
+    <table>
+        <tr><th>Nome</th><th>SKU</th><th>Estoque atual</th></tr>
+        {% for produto in parados %}
+        <tr>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.sku }}</td>
+            <td>{{ produto.estoqueAtual }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">Todos os produtos têm pelo menos uma venda registrada.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="dash-grid">
+
+    <div class="dash-secao">
+        <h4>Sugestão de reposição</h4>
+        <table>
+            <tr><th>Produto</th><th>SKU</th><th>Atual</th><th>Mínimo</th><th>Repor</th></tr>
+            {% for item in sugestao_reposicao %}
+            <tr>
+                <td>{{ item.produto.nome }}</td>
+                <td>{{ item.produto.sku }}</td>
+                <td class="estoque-baixo">{{ item.produto.estoqueAtual }}</td>
+                <td>{{ item.produto.estoqueMinimo }}</td>
+                <td><strong>+{{ item.gap }}</strong></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Todos os produtos estão com estoque adequado.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="dash-secao">
+        <h4>Previsão de duração do estoque <small style="font-weight:normal; color:#888;">(últimos 30 dias)</small></h4>
+        <table>
+            <tr><th>Produto</th><th>SKU</th><th>Estoque</th><th>Média/dia</th><th>Dias restantes</th></tr>
+            {% for item in previsao_duracao %}
+            <tr>
+                <td>{{ item.produto_nome }}</td>
+                <td>{{ item.produto_sku }}</td>
+                <td>{{ item.estoque_atual }}</td>
+                <td>{{ item.media_diaria }}</td>
+                <td {% if item.dias_restantes <= 7 %}class="estoque-baixo"{% endif %}>
+                    {{ item.dias_restantes }} dias
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Sem dados de vendas nos últimos 30 dias.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

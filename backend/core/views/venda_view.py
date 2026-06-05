@@ -66,8 +66,9 @@ class VendaCancelarView(APIView):
 
     def post(self, request, id):
         motivo = request.data.get('motivo', '')
+        senha_operacional_gerente = request.data.get('senha_operacional_gerente', '')
         try:
-            venda = self.service.cancelar(id, motivo, request.user)
+            venda = self.service.cancelar(id, motivo, request.user, senha_operacional_gerente)
             return Response(VendaSerializer(venda).data)
         except ObjectDoesNotExist:
             return Response({'erro': 'Venda não encontrada.'}, status=status.HTTP_404_NOT_FOUND)

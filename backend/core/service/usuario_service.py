@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 
+from core.models.usuario import PerfilUsuario
 from core.repository.usuario_repository import UsuarioRepository
 
 
@@ -30,3 +31,11 @@ class UsuarioService:
             raise ValidationError('A nova senha não pode ser vazia.')
         usuario = self.repo.buscar_por_id(usuario_id)
         self.repo.redefinir_senha(usuario, nova_senha)
+
+    def definir_senha_operacional(self, usuario_id, senha):
+        if not senha or not senha.strip():
+            raise ValidationError('A senha operacional não pode ser vazia.')
+        usuario = self.repo.buscar_por_id(usuario_id)
+        if usuario.perfil != PerfilUsuario.ADMIN:
+            raise ValidationError('Apenas administradores podem ter senha operacional.')
+        self.repo.definir_senha_operacional(usuario, senha)

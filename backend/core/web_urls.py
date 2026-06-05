@@ -1,5 +1,6 @@
 from django.urls import path
 
+from core.views.dashboard_view import tela_dashboard
 from core.views.web_view import (
     cancelar_venda,
     editar_cliente,
@@ -23,6 +24,7 @@ from core.views.web_view import (
 )
 
 urlpatterns = [
+    path('dashboard/', tela_dashboard, name='web-dashboard'),
     path('login/', tela_login, name='web-login'),
     path('logout/', tela_logout, name='web-logout'),
     path('menu/', tela_menu, name='web-menu'),

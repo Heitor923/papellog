@@ -16,7 +16,7 @@ class VendaSerializer(serializers.ModelSerializer):
         model = Venda
         fields = [
             'id', 'data', 'cliente_id', 'usuario_id', 'total', 'status', 'itens',
-            'motivo_cancelamento', 'data_cancelamento', 'cancelado_por_id',
+            'motivo_cancelamento', 'data_cancelamento', 'cancelado_por_id', 'autorizado_por_id',
         ]
 
 
