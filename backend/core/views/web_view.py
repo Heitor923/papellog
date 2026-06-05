@@ -100,6 +100,8 @@ def excluir_cliente(request, cliente_id):
     if request.user.perfil != PerfilUsuario.ADMIN:
         messages.error(request, 'Apenas administradores podem excluir clientes.')
         return redirect('/web/clientes/')
+    if request.method != 'POST':
+        return redirect('/web/clientes/')
     try:
         ClienteService().excluir(cliente_id)
         messages.success(request, 'Cliente excluído com sucesso.')
@@ -173,6 +175,8 @@ def editar_produto(request, produto_id):
 def excluir_produto(request, produto_id):
     if request.user.perfil != PerfilUsuario.ADMIN:
         messages.error(request, 'Apenas administradores podem excluir produtos.')
+        return redirect('/web/produtos/')
+    if request.method != 'POST':
         return redirect('/web/produtos/')
     try:
         ProdutoService().excluir(produto_id)
