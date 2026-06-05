@@ -27,6 +27,13 @@ class Venda(models.Model):
         on_delete=models.PROTECT,
         related_name='vendas_canceladas',
     )
+    autorizado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='vendas_autorizadas',
+    )
 
     class Meta:
         db_table = 'vendas'

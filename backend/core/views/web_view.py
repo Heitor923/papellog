@@ -236,8 +236,9 @@ def finalizar_venda(request, venda_id):
 def cancelar_venda(request, venda_id):
     if request.method == 'POST':
         motivo = request.POST.get('motivo', '')
+        senha_operacional_gerente = request.POST.get('senha_operacional_gerente', '')
         try:
-            VendaService().cancelar(venda_id, motivo, request.user)
+            VendaService().cancelar(venda_id, motivo, request.user, senha_operacional_gerente)
             messages.success(request, 'Venda cancelada com sucesso.')
         except Exception as e:
             messages.error(request, str(e))
@@ -307,6 +308,9 @@ def editar_usuario(request, usuario_id):
         }
         try:
             UsuarioService().atualizar(usuario_id, dados)
+            senha_operacional = request.POST.get('senha_operacional', '').strip()
+            if senha_operacional and dados.get('perfil') == PerfilUsuario.ADMIN:
+                UsuarioService().definir_senha_operacional(usuario_id, senha_operacional)
             messages.success(request, 'Usuário atualizado com sucesso.')
             return redirect('/web/usuarios/')
         except Exception as e:

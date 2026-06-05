@@ -1,4 +1,6 @@
-from core.models.usuario import Usuario
+from django.contrib.auth.hashers import check_password, make_password
+
+from core.models.usuario import PerfilUsuario, Usuario
 
 
 class UsuarioRepository:
@@ -28,3 +30,17 @@ class UsuarioRepository:
     def redefinir_senha(self, usuario, nova_senha):
         usuario.set_password(nova_senha)
         usuario.save()
+
+    def definir_senha_operacional(self, usuario, senha_plain):
+        usuario.senha_operacional = make_password(senha_plain)
+        usuario.save()
+
+    def buscar_admin_por_senha_operacional(self, senha_plain):
+        admins = Usuario.objects.filter(
+            perfil=PerfilUsuario.ADMIN,
+            ativo=True,
+        ).exclude(senha_operacional__isnull=True).exclude(senha_operacional='')
+        for admin in admins:
+            if check_password(senha_plain, admin.senha_operacional):
+                return admin
+        return None

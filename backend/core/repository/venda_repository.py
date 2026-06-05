@@ -32,10 +32,11 @@ class VendaRepository:
         venda.status = novo_status
         venda.save()
 
-    def cancelar(self, venda, motivo, usuario=None):
+    def cancelar(self, venda, motivo, usuario=None, autorizado_por=None):
         venda.status = StatusVenda.CANCELADA
         venda.motivo_cancelamento = motivo
         venda.data_cancelamento = timezone.now()
         venda.cancelado_por = usuario
+        venda.autorizado_por = autorizado_por
         venda.save()
         return venda

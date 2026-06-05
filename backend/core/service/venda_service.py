@@ -3,8 +3,9 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from core.models import StatusVenda
+from core.models import PerfilUsuario, StatusVenda
 from core.repository import ProdutoRepository, VendaRepository
+from core.repository.usuario_repository import UsuarioRepository
 
 
 class VendaService:
@@ -12,6 +13,7 @@ class VendaService:
     def __init__(self):
         self.venda_repo = VendaRepository()
         self.produto_repo = ProdutoRepository()
+        self.usuario_repo = UsuarioRepository()
 
     def listar(self):
         return self.venda_repo.listar()
@@ -61,17 +63,33 @@ class VendaService:
         return venda
 
     @transaction.atomic
-    def cancelar(self, venda_id, motivo, usuario=None):
+    def cancelar(self, venda_id, motivo, usuario=None, senha_operacional_gerente=None):
         venda = self.venda_repo.buscar_por_id(venda_id)
 
         if venda.status == StatusVenda.CANCELADA:
             raise ValidationError('Esta venda já está cancelada.')
+
+        autorizado_por = self._autorizar_cancelamento(usuario, senha_operacional_gerente)
 
         if venda.status == StatusVenda.FINALIZADA:
             for item in venda.itens.all():
                 produto = self.produto_repo.buscar_por_id(item.produto_id)
                 self.produto_repo.devolver_estoque(produto, item.quantidade)
 
-        self.venda_repo.cancelar(venda, motivo, usuario)
+        self.venda_repo.cancelar(venda, motivo, usuario, autorizado_por)
         return venda
+
+    def _autorizar_cancelamento(self, usuario, senha_operacional_gerente):
+        if usuario is None:
+            return None
+        if usuario.perfil == PerfilUsuario.ADMIN:
+            return usuario
+        admin = self.usuario_repo.buscar_admin_por_senha_operacional(
+            senha_operacional_gerente or ''
+        )
+        if not admin:
+            raise ValidationError(
+                'Senha gerencial inválida. Solicite autorização de um administrador.'
+            )
+        return admin
 

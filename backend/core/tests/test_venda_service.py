@@ -118,7 +118,55 @@ class VendaServiceTest(TestCase):
         self.assertIsNotNone(venda.data_cancelamento)
 
     def test_cancelamento_salva_usuario(self):
+        admin = Usuario.objects.create_user(
+            username='admin_cancel', password='senha123', nome='Admin Cancel',
+            perfil='ADMIN',
+        )
         venda = self.service.criar(self._dados_venda())
-        self.service.cancelar(venda.id, 'Cancelado pelo usuário', self.usuario)
+        self.service.cancelar(venda.id, 'Cancelado pelo usuário', admin)
         venda.refresh_from_db()
+        self.assertEqual(venda.cancelado_por, admin)
+
+    # --- Autorização gerencial ---
+
+    def test_admin_cancela_sem_senha_e_se_autoriza(self):
+        admin = Usuario.objects.create_user(
+            username='admin_auto', password='senha123', nome='Admin Auto',
+            perfil='ADMIN',
+        )
+        venda = self.service.criar(self._dados_venda())
+        self.service.cancelar(venda.id, 'Admin cancela', admin)
+        venda.refresh_from_db()
+        self.assertEqual(venda.status, StatusVenda.CANCELADA)
+        self.assertEqual(venda.cancelado_por, admin)
+        self.assertEqual(venda.autorizado_por, admin)
+
+    def test_funcionario_com_senha_gerente_correta_cancela(self):
+        from django.contrib.auth.hashers import make_password
+        admin = Usuario.objects.create_user(
+            username='admin_auth1', password='p', nome='Admin Auth', perfil='ADMIN',
+        )
+        admin.senha_operacional = make_password('senha_gerente')
+        admin.save()
+        venda = self.service.criar(self._dados_venda())
+        self.service.cancelar(venda.id, 'Autorizado', self.usuario, 'senha_gerente')
+        venda.refresh_from_db()
+        self.assertEqual(venda.status, StatusVenda.CANCELADA)
         self.assertEqual(venda.cancelado_por, self.usuario)
+        self.assertEqual(venda.autorizado_por, admin)
+
+    def test_funcionario_com_senha_gerente_errada_levanta_erro(self):
+        from django.contrib.auth.hashers import make_password
+        admin = Usuario.objects.create_user(
+            username='admin_auth2', password='p', nome='Admin Auth2', perfil='ADMIN',
+        )
+        admin.senha_operacional = make_password('senha_certa')
+        admin.save()
+        venda = self.service.criar(self._dados_venda())
+        with self.assertRaises(ValidationError):
+            self.service.cancelar(venda.id, 'Tentativa', self.usuario, 'senha_errada')
+
+    def test_funcionario_sem_admin_com_senha_levanta_erro(self):
+        venda = self.service.criar(self._dados_venda())
+        with self.assertRaises(ValidationError):
+            self.service.cancelar(venda.id, 'Sem admin', self.usuario, 'qualquer')
