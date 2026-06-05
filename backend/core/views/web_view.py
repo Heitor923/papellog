@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from core.models.usuario import PerfilUsuario
-from core.service import ClienteService, IAService, ProdutoService, RelatorioAvancadoService, RelatorioService, UsuarioService, VendaService
+from core.service import ClienteService, IAService, ProdutoService, RelatorioAvancadoService, UsuarioService, VendaService
 
 
 def tela_login(request):
@@ -201,7 +201,7 @@ def tela_vendas(request):
             ]
             dados = {
                 'cliente_id': int(request.POST.get('cliente_id')),
-                'usuario_id': request.user.id,
+                'usuario': request.user,
                 'itens': itens,
             }
             VendaService().criar(dados)
@@ -212,20 +212,26 @@ def tela_vendas(request):
             messages.error(request, str(e))
         return redirect('/web/vendas/')
 
-    vendas = VendaService().listar()
-    clientes = ClienteService().listar()
-    produtos = ProdutoService().listar()
+    todas = VendaService().listar().select_related(
+        'cliente', 'finalizado_por', 'cancelado_por', 'autorizado_por'
+    ).order_by('-data')
+
     return render(request, 'vendas.html', {
-        'vendas': vendas,
-        'clientes': clientes,
-        'produtos': produtos,
+        'vendas_pendentes': todas.filter(status='PENDENTE'),
+        'vendas_finalizadas': todas.filter(status='FINALIZADA'),
+        'vendas_canceladas': todas.filter(status='CANCELADA'),
+        'count_pendentes': todas.filter(status='PENDENTE').count(),
+        'count_finalizadas': todas.filter(status='FINALIZADA').count(),
+        'count_canceladas': todas.filter(status='CANCELADA').count(),
+        'clientes': ClienteService().listar(),
+        'produtos': ProdutoService().listar(),
     })
 
 
 @login_required(login_url='/web/login/')
 def finalizar_venda(request, venda_id):
     try:
-        VendaService().finalizar(venda_id)
+        VendaService().finalizar(venda_id, request.user)
         messages.success(request, 'Venda finalizada com sucesso.')
     except Exception as e:
         messages.error(request, str(e))

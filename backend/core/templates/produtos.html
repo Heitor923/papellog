@@ -1,72 +1,123 @@
 {% extends 'base.html' %}
-
+{% block page_title %}Produtos{% endblock %}
 {% block conteudo %}
 
-<h3>Produtos</h3>
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Produtos</h2>
+    <p>Catálogo de produtos e controle de estoque</p>
+  </div>
+</div>
 
 {% if user.perfil == 'ADMIN' %}
-<h4>Cadastrar Produto</h4>
-<form method="post">
-    {% csrf_token %}
-    <p><label>Nome: <input type="text" name="nome" required></label></p>
-    <p><label>Descrição: <textarea name="descricao"></textarea></label></p>
-    <p><label>SKU: <input type="text" name="sku" required></label></p>
-    <p><label>Preço: <input type="number" name="preco" step="0.01" min="0" required></label></p>
-    <p><label>Estoque Atual: <input type="number" name="estoqueAtual" min="0" value="0" required></label></p>
-    <p><label>Estoque Mínimo: <input type="number" name="estoqueMinimo" min="0" value="0" required></label></p>
-    <p><label><input type="checkbox" name="ativo" checked> Ativo</label></p>
-    <button type="submit">Cadastrar</button>
-</form>
-<hr>
+<div class="card mb-6">
+  <div class="card-header"><i class="bi bi-box-seam"></i> Cadastrar novo produto</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome</label>
+          <input type="text" name="nome" class="form-control" placeholder="Nome do produto" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">SKU</label>
+          <input type="text" name="sku" class="form-control td-mono" placeholder="COD-001" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea name="descricao" class="form-control" rows="2" placeholder="Descrição do produto"></textarea>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">Preço (R$)</label>
+          <input type="number" name="preco" class="form-control" step="0.01" min="0" placeholder="0,00" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estoque atual</label>
+          <input type="number" name="estoqueAtual" class="form-control" min="0" value="0" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estoque mínimo</label>
+          <input type="number" name="estoqueMinimo" class="form-control" min="0" value="0" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-check">
+          <input type="checkbox" name="ativo" checked> Produto ativo
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Cadastrar produto</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endif %}
 
-<h4>Produtos Cadastrados</h4>
-<table border="1" cellpadding="5">
-    <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Descrição</th>
-        <th>SKU</th>
-        <th>Preço</th>
-        <th>Estoque</th>
-        <th>Mínimo</th>
-        <th>Situação do estoque</th>
-        <th>Ativo</th>
+<div class="table-wrap">
+  <div class="table-head">
+    <div class="table-head-title"><i class="bi bi-box-seam text-muted"></i> Produtos cadastrados</div>
+    <span class="badge" style="background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB;">{{ produtos|length }}</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Nome</th><th>SKU</th><th>Preço</th>
+        <th>Estoque</th><th>Mínimo</th><th>Situação</th><th>Status</th>
         {% if user.perfil == 'ADMIN' %}<th>Ações</th>{% endif %}
-    </tr>
-    {% for produto in produtos %}
-    <tr>
-        <td>{{ produto.id }}</td>
-        <td>{{ produto.nome }}</td>
-        <td>{{ produto.descricao }}</td>
-        <td>{{ produto.sku }}</td>
-        <td>R$ {{ produto.preco }}</td>
-        <td>{{ produto.estoqueAtual }}</td>
-        <td>{{ produto.estoqueMinimo }}</td>
-        <td>
-            {% if produto.estoqueAtual <= produto.estoqueMinimo %}
-                <span class="estoque-baixo">Estoque baixo</span>
-            {% else %}
-                Normal
-            {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for produto in produtos %}
+      <tr>
+        <td class="td-id">#{{ produto.id }}</td>
+        <td class="td-strong">{{ produto.nome }}</td>
+        <td class="td-mono text-muted">{{ produto.sku }}</td>
+        <td class="font-semibold">R$ {{ produto.preco }}</td>
+        <td class="{% if produto.estoqueAtual <= produto.estoqueMinimo %}text-danger font-semibold{% endif %}">
+          {{ produto.estoqueAtual }}
         </td>
-        <td>{% if produto.ativo %}Sim{% else %}Não{% endif %}</td>
+        <td class="text-muted">{{ produto.estoqueMinimo }}</td>
+        <td>
+          {% if produto.estoqueAtual <= produto.estoqueMinimo %}
+          <span class="badge badge-cancelada"><i class="bi bi-exclamation-triangle"></i> Baixo</span>
+          {% else %}
+          <span class="badge badge-finalizada"><i class="bi bi-check"></i> Normal</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if produto.ativo %}
+          <span class="badge badge-finalizada">Ativo</span>
+          {% else %}
+          <span class="badge" style="background:#F3F4F6;color:#6B7280;border:1px solid #E5E7EB;">Inativo</span>
+          {% endif %}
+        </td>
         {% if user.perfil == 'ADMIN' %}
         <td>
-            <a href="/web/produtos/{{ produto.id }}/editar/">Editar</a>
-            |
-            <form method="post" action="/web/produtos/{{ produto.id }}/excluir/" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('Excluir {{ produto.nome }}?')">Excluir</button>
+          <div class="td-actions">
+            <a href="/web/produtos/{{ produto.id }}/editar/" class="btn btn-ghost btn-sm">
+              <i class="bi bi-pencil"></i> Editar
+            </a>
+            <form method="post" action="/web/produtos/{{ produto.id }}/excluir/" style="display:inline;"
+                  onsubmit="return confirm('Excluir {{ produto.nome }}?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
             </form>
+          </div>
         </td>
         {% endif %}
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="{% if user.perfil == 'ADMIN' %}10{% else %}9{% endif %}">Nenhum produto cadastrado.</td>
-    </tr>
-    {% endfor %}
-</table>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="{% if user.perfil == 'ADMIN' %}9{% else %}8{% endif %}">
+          <div class="empty-state"><i class="bi bi-box-seam"></i><p>Nenhum produto cadastrado.</p></div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 {% endblock %}

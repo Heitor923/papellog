@@ -1,60 +1,106 @@
 {% extends 'base.html' %}
-
+{% block page_title %}Usuários{% endblock %}
 {% block conteudo %}
 
-<h3>Usuários</h3>
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Usuários</h2>
+    <p>Gerenciamento da equipe do sistema</p>
+  </div>
+</div>
 
-<h4>Criar Usuário</h4>
-<form method="post">
-    {% csrf_token %}
-    <p><label>Username: <input type="text" name="username" required></label></p>
-    <p><label>Nome: <input type="text" name="nome"></label></p>
-    <p><label>Email: <input type="email" name="email"></label></p>
-    <p>
-        <label>Perfil:
-            <select name="perfil">
-                {% for valor, label in perfis %}
-                <option value="{{ valor }}">{{ label }}</option>
-                {% endfor %}
-            </select>
-        </label>
-    </p>
-    <p><label><input type="checkbox" name="ativo" checked> Ativo</label></p>
-    <p><label>Senha: <input type="password" name="senha" required></label></p>
-    <button type="submit">Criar</button>
-</form>
+<div class="card mb-6">
+  <div class="card-header"><i class="bi bi-person-plus"></i> Criar novo usuário</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control td-mono" placeholder="nome.sobrenome" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input type="text" name="nome" class="form-control" placeholder="Nome do usuário">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" name="email" class="form-control" placeholder="email@exemplo.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha inicial</label>
+          <input type="password" name="senha" class="form-control" placeholder="Mínimo 8 caracteres" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Perfil</label>
+          <select name="perfil" class="form-control">
+            {% for valor, label in perfis %}
+            <option value="{{ valor }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="justify-content:flex-end; display:flex; align-items:flex-end; padding-bottom:16px;">
+          <label class="form-check">
+            <input type="checkbox" name="ativo" checked> Usuário ativo
+          </label>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-person-plus"></i> Criar usuário</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-<hr>
-
-<h4>Usuários Cadastrados</h4>
-<table border="1" cellpadding="5">
-    <tr>
-        <th>ID</th>
-        <th>Username</th>
-        <th>Nome</th>
-        <th>Email</th>
-        <th>Perfil</th>
-        <th>Ativo</th>
-        <th>Ações</th>
-    </tr>
-    {% for usuario in usuarios %}
-    <tr>
-        <td>{{ usuario.id }}</td>
-        <td>{{ usuario.username }}</td>
-        <td>{{ usuario.nome }}</td>
-        <td>{{ usuario.email }}</td>
-        <td>{{ usuario.perfil }}</td>
-        <td>{% if usuario.ativo %}Sim{% else %}Não{% endif %}</td>
+<div class="table-wrap">
+  <div class="table-head">
+    <div class="table-head-title"><i class="bi bi-people text-muted"></i> Usuários cadastrados</div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Username</th><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr>
+    </thead>
+    <tbody>
+      {% for usuario in usuarios %}
+      <tr>
+        <td class="td-id">#{{ usuario.id }}</td>
+        <td class="td-mono font-semibold">{{ usuario.username }}</td>
+        <td class="td-strong">{{ usuario.nome }}</td>
+        <td class="text-muted text-sm">{{ usuario.email|default:"—" }}</td>
         <td>
-            <a href="/web/usuarios/{{ usuario.id }}/editar/">Editar</a> |
-            <a href="/web/usuarios/{{ usuario.id }}/senha/">Redefinir senha</a>
+          {% if usuario.perfil == 'ADMIN' %}
+          <span class="badge badge-admin"><i class="bi bi-shield-check"></i> Admin</span>
+          {% else %}
+          <span class="badge badge-funcionario"><i class="bi bi-person"></i> Funcionário</span>
+          {% endif %}
         </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="7">Nenhum usuário cadastrado.</td>
-    </tr>
-    {% endfor %}
-</table>
+        <td>
+          {% if usuario.ativo %}
+          <span class="badge badge-finalizada">Ativo</span>
+          {% else %}
+          <span class="badge badge-cancelada">Inativo</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="td-actions">
+            <a href="/web/usuarios/{{ usuario.id }}/editar/" class="btn btn-ghost btn-sm">
+              <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="/web/usuarios/{{ usuario.id }}/senha/" class="btn btn-ghost btn-sm">
+              <i class="bi bi-key"></i> Senha
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7"><div class="empty-state"><i class="bi bi-people"></i><p>Nenhum usuário cadastrado.</p></div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 {% endblock %}

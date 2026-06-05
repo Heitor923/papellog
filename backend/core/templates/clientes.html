@@ -1,57 +1,95 @@
 {% extends 'base.html' %}
-
+{% block page_title %}Clientes{% endblock %}
 {% block conteudo %}
 
-<h3>Clientes</h3>
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Clientes</h2>
+    <p>Gerencie o cadastro de clientes</p>
+  </div>
+</div>
 
-<h4>Cadastrar Cliente</h4>
-<form method="post">
-    {% csrf_token %}
-    <p><label>Nome: <input type="text" name="nome" required></label></p>
-    <p><label>CPF (apenas números): <input type="text" name="cpf" maxlength="11" required></label></p>
-    <p><label>Email: <input type="email" name="email" required></label></p>
-    <p><label>Telefone: <input type="text" name="telefone"></label></p>
-    <p><label>Endereço: <input type="text" name="endereco"></label></p>
-    <button type="submit">Cadastrar</button>
-</form>
+<!-- Formulário de cadastro -->
+<div class="card mb-6">
+  <div class="card-header"><i class="bi bi-person-plus"></i> Cadastrar novo cliente</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input type="text" name="nome" class="form-control" placeholder="Nome do cliente" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF <span class="text-muted">(somente números)</span></label>
+          <input type="text" name="cpf" class="form-control td-mono" placeholder="00000000000" maxlength="11" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" name="email" class="form-control" placeholder="email@exemplo.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="text" name="telefone" class="form-control" placeholder="(00) 00000-0000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Endereço</label>
+        <input type="text" name="endereco" class="form-control" placeholder="Rua, número, bairro">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Cadastrar cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-<hr>
-
-<h4>Clientes Cadastrados</h4>
-<table border="1" cellpadding="5">
-    <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>CPF</th>
-        <th>Email</th>
-        <th>Telefone</th>
-        <th>Endereço</th>
-        <th>Ações</th>
-    </tr>
-    {% for cliente in clientes %}
-    <tr>
-        <td>{{ cliente.id }}</td>
-        <td>{{ cliente.nome }}</td>
-        <td>{{ cliente.cpf }}</td>
+<!-- Listagem -->
+<div class="table-wrap">
+  <div class="table-head">
+    <div class="table-head-title"><i class="bi bi-people text-muted"></i> Clientes cadastrados</div>
+    <span class="badge" style="background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB;">{{ clientes|length }}</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cliente in clientes %}
+      <tr>
+        <td class="td-id">#{{ cliente.id }}</td>
+        <td class="td-strong">{{ cliente.nome }}</td>
+        <td class="td-mono text-muted">{{ cliente.cpf }}</td>
         <td>{{ cliente.email }}</td>
-        <td>{{ cliente.telefone }}</td>
-        <td>{{ cliente.endereco }}</td>
+        <td class="text-muted">{{ cliente.telefone|default:"—" }}</td>
         <td>
-            <a href="/web/clientes/{{ cliente.id }}/editar/">Editar</a>
+          <div class="td-actions">
+            <a href="/web/clientes/{{ cliente.id }}/editar/" class="btn btn-ghost btn-sm">
+              <i class="bi bi-pencil"></i> Editar
+            </a>
             {% if user.perfil == 'ADMIN' %}
-            |
-            <form method="post" action="/web/clientes/{{ cliente.id }}/excluir/" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('Excluir {{ cliente.nome }}?')">Excluir</button>
+            <form method="post" action="/web/clientes/{{ cliente.id }}/excluir/" style="display:inline;"
+                  onsubmit="return confirm('Excluir {{ cliente.nome }}?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Excluir</button>
             </form>
             {% endif %}
+          </div>
         </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="7">Nenhum cliente cadastrado.</td>
-    </tr>
-    {% endfor %}
-</table>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">
+          <div class="empty-state"><i class="bi bi-person-x"></i><p>Nenhum cliente cadastrado.</p></div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 {% endblock %}

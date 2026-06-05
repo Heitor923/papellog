@@ -29,7 +29,7 @@ class VendaService:
 
         dados_venda = {
             'cliente_id': dados['cliente_id'],
-            'usuario_id': dados['usuario_id'],
+            'usuario_id': dados['usuario'].id,
         }
         venda = self.venda_repo.criar(dados_venda)
 
@@ -44,7 +44,7 @@ class VendaService:
         return venda
 
     @transaction.atomic
-    def finalizar(self, venda_id):
+    def finalizar(self, venda_id, usuario=None):
         venda = self.venda_repo.buscar_por_id(venda_id)
 
         if venda.status != StatusVenda.PENDENTE:
@@ -59,7 +59,7 @@ class VendaService:
                 )
             self.produto_repo.atualizar_estoque(produto, item.quantidade)
 
-        self.venda_repo.atualizar_status(venda, StatusVenda.FINALIZADA)
+        self.venda_repo.finalizar(venda, usuario)
         return venda
 
     @transaction.atomic

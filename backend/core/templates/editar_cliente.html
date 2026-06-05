@@ -1,18 +1,50 @@
 {% extends 'base.html' %}
-
+{% block page_title %}Editar Cliente{% endblock %}
 {% block conteudo %}
 
-<h3>Editar Cliente</h3>
+<div class="page-header">
+  <div class="page-header-left">
+    <h2>Editar Cliente</h2>
+    <p>Atualize os dados do cliente</p>
+  </div>
+  <a href="/web/clientes/" class="btn btn-ghost"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
 
-<form method="post">
-    {% csrf_token %}
-    <p><label>Nome: <input type="text" name="nome" value="{{ cliente.nome }}" required></label></p>
-    <p><label>CPF (apenas números): <input type="text" name="cpf" value="{{ cliente.cpf }}" maxlength="11" required></label></p>
-    <p><label>Email: <input type="email" name="email" value="{{ cliente.email }}" required></label></p>
-    <p><label>Telefone: <input type="text" name="telefone" value="{{ cliente.telefone }}"></label></p>
-    <p><label>Endereço: <input type="text" name="endereco" value="{{ cliente.endereco }}"></label></p>
-    <button type="submit">Salvar</button>
-    <a href="/web/clientes/">Cancelar</a>
-</form>
+<div class="card" style="max-width:640px;">
+  <div class="card-header"><i class="bi bi-pencil"></i> {{ cliente.nome }}</div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input type="text" name="nome" class="form-control" value="{{ cliente.nome }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF <span class="text-muted">(somente números)</span></label>
+          <input type="text" name="cpf" class="form-control td-mono" value="{{ cliente.cpf }}" maxlength="11" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" name="email" class="form-control" value="{{ cliente.email }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="text" name="telefone" class="form-control" value="{{ cliente.telefone }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Endereço</label>
+        <input type="text" name="endereco" class="form-control" value="{{ cliente.endereco }}">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> Salvar alterações</button>
+        <a href="/web/clientes/" class="btn btn-ghost">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
 
 {% endblock %}

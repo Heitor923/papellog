@@ -45,7 +45,7 @@ class ClienteServiceTest(TestCase):
         )
         VendaService().criar({
             'cliente_id': cliente.id,
-            'usuario_id': usuario.id,
+            'usuario': usuario,
             'itens': [{'produto_id': produto.id, 'quantidade': 1}],
         })
 

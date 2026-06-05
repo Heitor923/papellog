@@ -22,7 +22,9 @@ class VendaListView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
-            venda = self.service.criar(serializer.validated_data)
+            dados = serializer.validated_data
+            dados['usuario'] = request.user
+            venda = self.service.criar(dados)
             return Response(VendaSerializer(venda).data, status=status.HTTP_201_CREATED)
         except ValidationError as e:
             return Response({'erro': e.messages}, status=status.HTTP_400_BAD_REQUEST)
@@ -50,7 +52,7 @@ class VendaFinalizarView(APIView):
 
     def post(self, request, id):
         try:
-            venda = self.service.finalizar(id)
+            venda = self.service.finalizar(id, request.user)
             return Response(VendaSerializer(venda).data)
         except ObjectDoesNotExist:
             return Response({'erro': 'Venda não encontrada.'}, status=status.HTTP_404_NOT_FOUND)

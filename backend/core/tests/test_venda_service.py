@@ -33,7 +33,7 @@ class VendaServiceTest(TestCase):
     def _dados_venda(self, itens=None):
         return {
             'cliente_id': self.cliente.id,
-            'usuario_id': self.usuario.id,
+            'usuario': self.usuario,
             'itens': itens if itens is not None else [
                 {'produto_id': self.produto.id, 'quantidade': 2}
             ],
@@ -77,6 +77,40 @@ class VendaServiceTest(TestCase):
         self.service.finalizar(venda.id)
         with self.assertRaises(ValidationError):
             self.service.finalizar(venda.id)
+
+    # --- Rastreabilidade da finalização ---
+
+    def test_finalizar_salva_finalizado_por(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.finalizar(venda.id, self.usuario)
+        venda.refresh_from_db()
+        self.assertEqual(venda.finalizado_por, self.usuario)
+
+    def test_finalizar_salva_data_finalizacao(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.finalizar(venda.id, self.usuario)
+        venda.refresh_from_db()
+        self.assertIsNotNone(venda.data_finalizacao)
+
+    def test_finalizar_sem_usuario_nao_levanta_erro(self):
+        venda = self.service.criar(self._dados_venda())
+        self.service.finalizar(venda.id)  # usuario=None é permitido
+        venda.refresh_from_db()
+        self.assertEqual(venda.status, StatusVenda.FINALIZADA)
+        self.assertIsNone(venda.finalizado_por)
+
+    def test_venda_pendente_ainda_pode_ser_finalizada(self):
+        venda = self.service.criar(self._dados_venda())
+        self.assertEqual(venda.status, StatusVenda.PENDENTE)
+        self.service.finalizar(venda.id, self.usuario)
+        venda.refresh_from_db()
+        self.assertEqual(venda.status, StatusVenda.FINALIZADA)
+
+    def test_estoque_descontado_corretamente_ao_finalizar(self):
+        venda = self.service.criar(self._dados_venda())  # quantidade=2, estoque=10
+        self.service.finalizar(venda.id, self.usuario)
+        self.produto.refresh_from_db()
+        self.assertEqual(self.produto.estoqueAtual, 8)  # 10 - 2
 
     # --- Cancelamento ---
 
