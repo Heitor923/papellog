@@ -70,6 +70,13 @@ class DashboardServiceTest(TestCase):
         dados = self.service.resumo()
         self.assertEqual(dados['vendas_canceladas'], 1)
 
+    def test_vendas_do_dia_considera_apenas_finalizadas(self):
+        self._criar_venda(StatusVenda.FINALIZADA)
+        self._criar_venda(StatusVenda.PENDENTE)
+        self._criar_venda(StatusVenda.CANCELADA)
+        dados = self.service.resumo()
+        self.assertEqual(dados['vendas_do_dia'], 1)
+
     def test_vendas_pendentes_nao_contam_canceladas(self):
         self._criar_venda(StatusVenda.PENDENTE)
         self._criar_venda(StatusVenda.CANCELADA)
@@ -119,6 +126,20 @@ class DashboardServiceTest(TestCase):
         nomes = [item['produto__nome'] for item in dados['mais_vendidos']]
         self.assertIn('Caneta', nomes)
 
+    def test_mais_vendidos_ignora_vendas_pendentes_e_canceladas(self):
+        for status in [StatusVenda.PENDENTE, StatusVenda.CANCELADA]:
+            venda = self._criar_venda(status, '15.00')
+            ItemVenda.objects.create(
+                venda=venda,
+                produto=self.produto_normal,
+                quantidade=3,
+                precoUnitario=Decimal('5.00'),
+                subtotal=Decimal('15.00'),
+            )
+        dados = self.service.resumo()
+        nomes = [item['produto__nome'] for item in dados['mais_vendidos']]
+        self.assertNotIn('Caneta', nomes)
+
     def test_mais_vendidos_limita_a_cinco(self):
         for i in range(7):
             prod = Produto.objects.create(
@@ -166,6 +187,17 @@ class DashboardServiceTest(TestCase):
         dados = self.service.resumo()
         skus = [p.sku for p in dados['parados']]
         self.assertNotIn('CAN_DASH', skus)
+
+    def test_produto_com_apenas_venda_pendente_ou_cancelada_continua_parado(self):
+        for status in [StatusVenda.PENDENTE, StatusVenda.CANCELADA]:
+            venda = self._criar_venda(status, '5.00')
+            ItemVenda.objects.create(
+                venda=venda, produto=self.produto_normal,
+                quantidade=1, precoUnitario=Decimal('5.00'), subtotal=Decimal('5.00'),
+            )
+        dados = self.service.resumo()
+        skus = [p.sku for p in dados['parados']]
+        self.assertIn('CAN_DASH', skus)
 
     # --- sugestão de reposição ---
 

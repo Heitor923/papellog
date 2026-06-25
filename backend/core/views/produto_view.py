@@ -5,11 +5,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import PerfilUsuario
+from core.permissions import IsAdminOrReadOnly
 from core.serializers import ProdutoSerializer
 from core.service import ProdutoService
 
 
 class ProdutoListView(APIView):
+    permission_classes = [IsAdminOrReadOnly]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -31,6 +33,7 @@ class ProdutoListView(APIView):
 
 
 class ProdutoDetailView(APIView):
+    permission_classes = [IsAdminOrReadOnly]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

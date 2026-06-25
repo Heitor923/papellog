@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 from django.test import Client, TestCase
+from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.models import Cliente, Produto, Usuario
 
@@ -24,6 +26,12 @@ class PermissoesWebTest(TestCase):
             nome='Produto Permissao', descricao='Desc', sku='SKU_PERM',
             preco=Decimal('10.00'), estoqueAtual=10, estoqueMinimo=1,
         )
+
+    def _api_client(self, usuario):
+        client = APIClient()
+        refresh = RefreshToken.for_user(usuario)
+        client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+        return client
 
     # --- Acesso sem autenticação ---
 
@@ -141,3 +149,55 @@ class PermissoesWebTest(TestCase):
         self.client.login(username='func_test', password='senha123')
         response = self.client.get('/web/ia/')
         self.assertEqual(response.status_code, 200)
+
+    # --- API de produtos ---
+
+    def test_sem_autenticacao_nao_lista_produtos_pela_api(self):
+        response = APIClient().get('/produtos')
+        self.assertEqual(response.status_code, 401)
+
+    def test_funcionario_lista_produtos_pela_api(self):
+        response = self._api_client(self.funcionario).get('/produtos')
+        self.assertEqual(response.status_code, 200)
+
+    def test_funcionario_visualiza_produto_pela_api(self):
+        response = self._api_client(self.funcionario).get(f'/produtos/{self.produto_obj.id}')
+        self.assertEqual(response.status_code, 200)
+
+    def test_funcionario_nao_cria_produto_pela_api(self):
+        dados = {
+            'nome': 'Produto API',
+            'descricao': 'Desc API',
+            'sku': 'SKU_API_FUNC',
+            'preco': '12.00',
+            'estoqueAtual': 5,
+            'estoqueMinimo': 1,
+            'ativo': True,
+        }
+        response = self._api_client(self.funcionario).post('/produtos', dados, format='json')
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(Produto.objects.filter(sku='SKU_API_FUNC').exists())
+
+    def test_funcionario_nao_edita_produto_pela_api(self):
+        response = self._api_client(self.funcionario).put(
+            f'/produtos/{self.produto_obj.id}',
+            {'preco': '99.00'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 403)
+        self.produto_obj.refresh_from_db()
+        self.assertEqual(self.produto_obj.preco, Decimal('10.00'))
+
+    def test_admin_cria_produto_pela_api(self):
+        dados = {
+            'nome': 'Produto API Admin',
+            'descricao': 'Desc API',
+            'sku': 'SKU_API_ADMIN',
+            'preco': '12.00',
+            'estoqueAtual': 5,
+            'estoqueMinimo': 1,
+            'ativo': True,
+        }
+        response = self._api_client(self.admin).post('/produtos', dados, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Produto.objects.filter(sku='SKU_API_ADMIN').exists())

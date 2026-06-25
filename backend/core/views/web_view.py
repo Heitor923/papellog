@@ -224,7 +224,7 @@ def tela_vendas(request):
         'count_finalizadas': todas.filter(status='FINALIZADA').count(),
         'count_canceladas': todas.filter(status='CANCELADA').count(),
         'clientes': ClienteService().listar(),
-        'produtos': ProdutoService().listar(),
+        'produtos': ProdutoService().listar().filter(ativo=True),
     })
 
 

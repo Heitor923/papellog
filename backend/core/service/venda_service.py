@@ -27,6 +27,8 @@ class VendaService:
         if not lista_itens:
             raise ValidationError('A venda deve ter pelo menos um item.')
 
+        self._validar_itens(lista_itens)
+
         dados_venda = {
             'cliente_id': dados['cliente_id'],
             'usuario_id': dados['usuario'].id,
@@ -36,6 +38,8 @@ class VendaService:
         total = Decimal('0')
         for dados_item in lista_itens:
             produto = self.produto_repo.buscar_por_id(dados_item['produto_id'])
+            if not produto.ativo:
+                raise ValidationError(f'O produto "{produto.nome}" está inativo e não pode ser vendido.')
             quantidade = dados_item['quantidade']
             self.venda_repo.adicionar_item(venda, produto, quantidade, produto.preco)
             total += produto.preco * quantidade
@@ -66,6 +70,9 @@ class VendaService:
     def cancelar(self, venda_id, motivo, usuario=None, senha_operacional_gerente=None):
         venda = self.venda_repo.buscar_por_id(venda_id)
 
+        if not motivo or not str(motivo).strip():
+            raise ValidationError('Informe o motivo do cancelamento.')
+
         if venda.status == StatusVenda.CANCELADA:
             raise ValidationError('Esta venda já está cancelada.')
 
@@ -92,4 +99,23 @@ class VendaService:
                 'Senha gerencial inválida. Solicite autorização de um administrador.'
             )
         return admin
+
+    def _validar_itens(self, lista_itens):
+        produtos_informados = set()
+        for dados_item in lista_itens:
+            produto_id = dados_item.get('produto_id')
+            if produto_id in produtos_informados:
+                raise ValidationError('A venda não pode conter o mesmo produto mais de uma vez.')
+            produtos_informados.add(produto_id)
+
+            quantidade = dados_item.get('quantidade')
+            try:
+                quantidade = int(quantidade)
+            except (TypeError, ValueError):
+                raise ValidationError('A quantidade de cada item deve ser um número inteiro maior ou igual a 1.')
+
+            if quantidade < 1:
+                raise ValidationError('A quantidade de cada item deve ser maior ou igual a 1.')
+
+            dados_item['quantidade'] = quantidade
 

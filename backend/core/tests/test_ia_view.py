@@ -4,7 +4,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.models import Cliente, ItemVenda, Produto, Usuario, Venda
+from core.models import Cliente, ItemVenda, Produto, StatusVenda, Usuario, Venda
 
 
 class IAViewTest(TestCase):
@@ -45,6 +45,7 @@ class IAViewTest(TestCase):
             cliente=self.cliente,
             usuario=self.usuario,
             total=Decimal('15.00'),
+            status=StatusVenda.FINALIZADA,
         )
         ItemVenda.objects.create(
             venda=venda,
@@ -70,6 +71,23 @@ class IAViewTest(TestCase):
         nomes = [item['produto_nome'] for item in response.data]
         self.assertNotIn('Borracha Branca', nomes)
 
+    def test_mais_vendidos_ignora_venda_pendente(self):
+        venda = Venda.objects.create(
+            cliente=self.cliente,
+            usuario=self.usuario,
+            total=Decimal('2.00'),
+        )
+        ItemVenda.objects.create(
+            venda=venda,
+            produto=self.produto_parado,
+            quantidade=1,
+            precoUnitario=Decimal('2.00'),
+            subtotal=Decimal('2.00'),
+        )
+        response = self.client.get('/ia/mais-vendidos')
+        nomes = [item['produto_nome'] for item in response.data]
+        self.assertNotIn('Borracha Branca', nomes)
+
     # --- menos-vendidos ---
 
     def test_menos_vendidos_retorna_200(self):
@@ -88,6 +106,23 @@ class IAViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_produtos_parados_contem_produto_sem_venda(self):
+        response = self.client.get('/ia/produtos-parados')
+        skus = [p['sku'] for p in response.data]
+        self.assertIn('BOR_IA', skus)
+
+    def test_produtos_parados_ignora_venda_pendente(self):
+        venda = Venda.objects.create(
+            cliente=self.cliente,
+            usuario=self.usuario,
+            total=Decimal('2.00'),
+        )
+        ItemVenda.objects.create(
+            venda=venda,
+            produto=self.produto_parado,
+            quantidade=1,
+            precoUnitario=Decimal('2.00'),
+            subtotal=Decimal('2.00'),
+        )
         response = self.client.get('/ia/produtos-parados')
         skus = [p['sku'] for p in response.data]
         self.assertIn('BOR_IA', skus)

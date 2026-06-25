@@ -43,6 +43,37 @@ class VendaServiceTest(TestCase):
         with self.assertRaises(ValidationError):
             self.service.criar(self._dados_venda(itens=[]))
 
+    def test_venda_com_quantidade_zero_levanta_erro(self):
+        with self.assertRaisesMessage(ValidationError, 'maior ou igual a 1'):
+            self.service.criar(self._dados_venda(itens=[
+                {'produto_id': self.produto.id, 'quantidade': 0}
+            ]))
+
+    def test_venda_com_quantidade_negativa_levanta_erro(self):
+        with self.assertRaisesMessage(ValidationError, 'maior ou igual a 1'):
+            self.service.criar(self._dados_venda(itens=[
+                {'produto_id': self.produto.id, 'quantidade': -1}
+            ]))
+
+    def test_venda_com_quantidade_invalida_levanta_erro(self):
+        with self.assertRaisesMessage(ValidationError, 'número inteiro'):
+            self.service.criar(self._dados_venda(itens=[
+                {'produto_id': self.produto.id, 'quantidade': ''}
+            ]))
+
+    def test_venda_com_item_duplicado_levanta_erro(self):
+        with self.assertRaisesMessage(ValidationError, 'mesmo produto'):
+            self.service.criar(self._dados_venda(itens=[
+                {'produto_id': self.produto.id, 'quantidade': 1},
+                {'produto_id': self.produto.id, 'quantidade': 2},
+            ]))
+
+    def test_venda_com_produto_inativo_levanta_erro(self):
+        self.produto.ativo = False
+        self.produto.save()
+        with self.assertRaisesMessage(ValidationError, 'inativo'):
+            self.service.criar(self._dados_venda())
+
     def test_calculo_total_automatico(self):
         venda = self.service.criar(self._dados_venda())
         self.assertEqual(venda.total, Decimal('10.00'))  # 5.00 * 2
@@ -119,6 +150,11 @@ class VendaServiceTest(TestCase):
         self.service.cancelar(venda.id, 'Desistência do cliente')
         venda.refresh_from_db()
         self.assertEqual(venda.status, StatusVenda.CANCELADA)
+
+    def test_cancelar_venda_sem_motivo_levanta_erro(self):
+        venda = self.service.criar(self._dados_venda())
+        with self.assertRaisesMessage(ValidationError, 'motivo'):
+            self.service.cancelar(venda.id, '   ')
 
     def test_cancelar_venda_pendente_nao_altera_estoque(self):
         venda = self.service.criar(self._dados_venda())  # quantidade=2

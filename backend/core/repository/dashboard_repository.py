@@ -11,7 +11,7 @@ class DashboardRepository:
 
     def vendas_do_dia(self):
         hoje = timezone.localdate()
-        return Venda.objects.filter(data__date=hoje).count()
+        return Venda.objects.filter(data__date=hoje, status=StatusVenda.FINALIZADA).count()
 
     def total_vendido_mes(self):
         hoje = timezone.localdate()
@@ -40,6 +40,7 @@ class DashboardRepository:
     def produtos_mais_vendidos(self, limite=5):
         return (
             ItemVenda.objects
+            .filter(venda__status=StatusVenda.FINALIZADA)
             .values('produto__id', 'produto__nome', 'produto__sku')
             .annotate(total_vendido=Sum('quantidade'))
             .order_by('-total_vendido')
@@ -49,6 +50,7 @@ class DashboardRepository:
     def produtos_menos_vendidos(self, limite=5):
         return (
             ItemVenda.objects
+            .filter(venda__status=StatusVenda.FINALIZADA)
             .values('produto__id', 'produto__nome', 'produto__sku')
             .annotate(total_vendido=Sum('quantidade'))
             .order_by('total_vendido')
@@ -56,7 +58,9 @@ class DashboardRepository:
         )
 
     def produtos_parados(self):
-        ids_com_venda = ItemVenda.objects.values_list('produto_id', flat=True).distinct()
+        ids_com_venda = ItemVenda.objects.filter(
+            venda__status=StatusVenda.FINALIZADA
+        ).values_list('produto_id', flat=True).distinct()
         return list(Produto.objects.filter(ativo=True).exclude(id__in=ids_com_venda))
 
     def produtos_para_reposicao(self, limite=10):
