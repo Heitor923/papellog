@@ -1,0 +1,48 @@
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: papellog
+      POSTGRES_USER: papellog
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U papellog -d papellog"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    image: papellog:local
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:?Defina SECRET_KEY no .env}
+      DEBUG: "False"
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+      DB_NAME: papellog
+      DB_USER: papellog
+      DB_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no .env}
+      DB_HOST: db
+      DB_PORT: "5432"
+      SECURE_SSL_REDIRECT: "False"
+      SESSION_COOKIE_SECURE: "False"
+      CSRF_COOKIE_SECURE: "False"
+    depends_on:
+      db:
+        condition: service_healthy
+    
+    command:
+      - sh
+      - -c
+      - |
+        python manage.py migrate --noinput &&
+        exec gunicorn papellog.wsgi:application --bind 0.0.0.0:8000 --workers 2
+
+volumes:
+  postgres_data:
