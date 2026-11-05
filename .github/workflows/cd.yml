@@ -215,7 +215,7 @@ jobs:
             --retry 20 --retry-delay 3 --retry-connrefused \
             --max-time 5 \
             http://127.0.0.1:8000/web/login/ > /dev/null
-          echo "Deploy validado: Django respondeu em /admin/login/"
+          echo "Deploy validado: Django respondeu em /web/login/"
 
       - name: Mostrar logs se houver falha
         if: failure()
