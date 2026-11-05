@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/JWT-autentica%C3%A7%C3%A3o-orange" alt="JWT">
 </p>
 
-## 📌 Sobre o Projeto
+## 📌 Sobre o Projeto.
 
 O **PapelLog** é um **Sistema de Gestão Comercial (SGC)** voltado para pequenas papelarias e microempreendedores.
 
