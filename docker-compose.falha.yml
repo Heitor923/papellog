@@ -1,0 +1,7 @@
+
+services:
+  web:
+    command:
+      - sh
+      - -c
+      - "echo 'FALHA SIMULADA: aplicacao nao iniciou'; exit 1"
